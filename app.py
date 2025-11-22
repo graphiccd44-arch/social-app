@@ -8,7 +8,19 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "mysecretkey123")
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "12345")
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
-
+# --- Model စစ်ဆေးရန် ကုဒ် ---
+@app.route('/models')
+def check_models():
+    try:
+        model_list = []
+        for m in genai.list_models():
+            # စာထုတ်ပေးနိုင်တဲ့ Model တွေကိုပဲ ရွေးပြမယ်
+            if 'generateContent' in m.supported_generation_methods:
+                model_list.append(m.name)
+        return jsonify({"Available Models": model_list})
+    except Exception as e:
+        return f"Error: {str(e)}"
+# --------------------------
 def generate_content(topic, platform, tone, age, gender, persona, length, category, language, art_style, ai_model):
     model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json"})
     
