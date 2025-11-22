@@ -11,20 +11,17 @@ app.secret_key = os.environ.get("SECRET_KEY", "mysecretkey123")
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "12345")
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
-# --- LOGIC ---
 def generate_content(data):
     try:
         # Data Extraction
         topic = data.get('topic', '')
         platform = data.get('platform', 'Facebook')
         tone = data.get('tone', 'Professional')
-        age = data.get('age', 'Any')
-        gender = data.get('gender', 'All')
-        persona = data.get('persona', '')
-        length = data.get('length', 'Medium')
+        length = data.get('length', 'Medium') # Length is back!
         category = data.get('category', 'Awareness')
         language = data.get('language', 'Myanglish')
         ai_model = data.get('ai_model', 'Gemini 2.5 Flash')
+        creativity = data.get('creativity', 'Standard') # New Feature
         
         # Refinement
         refine_instruction = data.get('refine_instruction')
@@ -36,37 +33,70 @@ def generate_content(data):
         elif ai_model == "Gemini 2.5 Flash": target_model_id = 'gemini-2.5-flash'
         elif ai_model in ["DeepSeek", "ChatGPT"]: target_model_id = 'gemini-2.5-flash'
 
+        # Configure high temperature for creativity
+        gen_config = {
+            "response_mime_type": "application/json",
+            "temperature": 0.9 if creativity != "Standard" else 0.7 # Higher temp = More Creative
+        }
+
         try:
-            model = genai.GenerativeModel(target_model_id, generation_config={"response_mime_type": "application/json"})
+            model = genai.GenerativeModel(target_model_id, generation_config=gen_config)
         except:
-            model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json"})
+            model = genai.GenerativeModel('gemini-2.0-flash', generation_config=gen_config)
 
         # Prompt Building
         prompt = ""
+        
         if refine_instruction and current_text:
+            # Refinement Logic
             prompt = f"""
-            Act as an Editor.
+            Act as a Creative Editor.
             Original: "{current_text}"
             Task: Rewrite based on: "{refine_instruction}"
-            Keep style: {language}.
+            Constraints: Keep language ({language}).
             Output JSON with key: "post_content".
             """
         else:
+            # --- New Content Logic ---
+            
+            # Length Strictness
+            length_instr = "around 100-150 words"
+            if length == "Short": length_instr = "Very short, punchy, under 60 words (Strictly)."
+            elif length == "Long": length_instr = "Long-form, storytelling style, over 250 words (Strictly)."
+
+            # Creativity Logic
+            creative_instr = "Standard social media post."
+            if creativity == "Storytelling":
+                creative_instr = "Start with a hook/story. Use emotional triggers. Do NOT sound robotic. Use metaphors."
+            elif creativity == "Viral/Hook":
+                creative_instr = "Start with a controversial or shocking statement. High energy. Short sentences. Designed to go viral."
+            elif creativity == "Direct/Sales":
+                creative_instr = "Focus on pain points and solutions. Use psychological triggers (FOMO). Strong CTA."
+
+            lang_instr = "Burmese (Myanmar) mixed with English keywords naturally (Myanglish)."
+            if language == "Pure Burmese": lang_instr = "STRICTLY BURMESE ONLY."
+            elif language == "English Only": lang_instr = "STRICTLY ENGLISH ONLY."
+
+            model_persona = "You are a top-tier Creative Copywriter."
+            if ai_model == "DeepSeek": model_persona = "Act as DeepSeek. Logical, factual, detailed."
+            elif ai_model == "ChatGPT": model_persona = "Act as ChatGPT. Conversational, human-like."
+
             prompt = f"""
-            Act as Social Media Manager.
+            {model_persona}
             Platform: {platform}
             Topic: {topic}
-            Audience: {gender}, {age} ({persona})
             Goal: {category}
             Tone: {tone}
-            Length: {length}
-            Language: {language}
             
-            Formatting: Use line breaks and bold text.
-            Output JSON with key: "post_content".
-            """
+            CRITICAL INSTRUCTIONS:
+            1. Length: {length_instr}
+            2. Creativity Style: {creative_instr}
+            3. Language: {lang_instr}
+            4. Formatting: Use bolding for emphasis. Use proper line breaks.
 
-        # Generate
+            Output strictly in JSON format with a single key: "post_content".
+            """
+        
         response = model.generate_content(prompt)
         
         if not response.text: return {"post_content": "Error: No response from AI."}
@@ -84,10 +114,8 @@ def generate_content(data):
         print(f"Gen Error: {e}")
         return {"post_content": f"Error: {str(e)}"}
 
-# --- ROUTES ---
 @app.route('/', methods=['GET', 'POST'])
 def home():
-    # Indentation ကို သေချာ ပြင်ထားပေးပါတယ်
     if not session.get('logged_in'):
         error = None
         if request.method == 'POST':
@@ -97,7 +125,6 @@ def home():
             else:
                 error = "စကားဝှက် မှားယွင်းနေပါတယ်!"
         return render_template('index.html', show_login=True, error=error)
-    
     return render_template('index.html', show_login=False)
 
 @app.route('/logout')
