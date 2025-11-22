@@ -15,43 +15,43 @@ def generate_content(topic, platform, tone, age, gender, persona, length, catego
     target_model_id = 'gemini-2.0-flash' 
     if ai_model == "Gemini 3.0 Pro": target_model_id = 'gemini-3-pro-preview'
     elif ai_model == "Gemini 2.5 Flash": target_model_id = 'gemini-2.5-flash'
-    elif ai_model == "Gemini 2.5 Pro": target_model_id = 'gemini-2.5-pro'
     elif ai_model in ["DeepSeek", "ChatGPT"]: target_model_id = 'gemini-2.5-flash'
 
     try:
         model = genai.GenerativeModel(target_model_id, generation_config={"response_mime_type": "application/json"})
     except:
-        # Fallback if model not found
         model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json"})
 
-    # Setup Logic
-    audience_profile = f"{gender}, aged {age}"
-    if persona: audience_profile += f", specifically {persona}"
-
+    # Prompt Engineering for Spacing
     length_instruction = "standard length (100-150 words)"
-    if length == "Short": length_instruction = "very short, punchy (under 50 words)"
-    elif length == "Long": length_instruction = "long-form, detailed (over 200 words)"
+    if length == "Short": length_instruction = "short (under 50 words)"
+    elif length == "Long": length_instruction = "long (over 200 words)"
 
     lang_instruction = "Burmese (Myanmar) mixed with English keywords naturally (Myanglish)."
     if language == "Pure Burmese": lang_instruction = "STRICTLY BURMESE (Myanmar) ONLY."
     elif language == "English Only": lang_instruction = "STRICTLY ENGLISH ONLY."
 
-    model_persona = "You are an expert AI Social Media Manager."
-    if ai_model == "DeepSeek": model_persona = "Act as DeepSeek-V3. Logical, concise, factual."
-    elif ai_model == "ChatGPT": model_persona = "Act as ChatGPT-4o. Conversational, creative."
+    model_persona = "You are an expert Social Media Copywriter."
+    if ai_model == "DeepSeek": model_persona = "Act as DeepSeek. Logical and structured."
+    elif ai_model == "ChatGPT": model_persona = "Act as ChatGPT. Friendly and conversational."
 
     prompt = f"""
     {model_persona}
     Platform: {platform}
     Topic: {topic}
-    Target Audience: {audience_profile}
+    Target Audience: {gender}, aged {age} ({persona})
     Goal: {category}
     Tone: {tone}
     Length: {length_instruction}
     LANGUAGE: {lang_instruction}
 
+    FORMATTING RULES:
+    1. Do NOT use Markdown headers (#).
+    2. Use Bold (**) for key points.
+    3. CRITICAL: Use double line breaks between paragraphs to make it easy to read on mobile.
+    4. Use bullet points or emojis for lists, not numbered lists.
+    
     Output strictly in JSON format with a single key: "post_content".
-    Do NOT include image prompts.
     """
     
     try:
@@ -62,10 +62,9 @@ def generate_content(topic, platform, tone, age, gender, persona, length, catego
             data = json.loads(response.text)
             if isinstance(data, list): data = data[0] if len(data) > 0 else {}
         except:
-            # JSON မဟုတ်ရင် စာသားအတိုင်းယူမယ်
             return {"post_content": response.text}
 
-        content = data.get("post_content") or data.get("caption") or str(data)
+        content = data.get("post_content") or str(data)
         return {"post_content": content}
 
     except Exception as e:
@@ -93,7 +92,6 @@ def logout():
 def generate():
     if not session.get('logged_in'): return jsonify({'result': 'Unauthorized'}), 401
     data = request.json
-    # art_style ဖြုတ်လိုက်ပါပြီ
     result = generate_content(
         data.get('topic', ''), data.get('platform', 'Facebook'), data.get('tone', 'Professional'),
         data.get('age', 'Any Age'), data.get('gender', 'All'), data.get('persona', ''),
