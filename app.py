@@ -1,34 +1,46 @@
-from flask import Flask, render_template, request, jsonify
+import os
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import google.generativeai as genai
 
 app = Flask(__name__)
 
-# သင့် API Key ကို ဒီမှာထည့်ပါ
-import os
-# API Key ကို Server ကနေ ယူမယ့် ပုံစံပါ
+# Session အတွက် Secret Key (Render မှာ ပြောင်းလို့ရပါတယ်)
+app.secret_key = os.environ.get("SECRET_KEY", "mysecretkey123")
+
+# စကားဝှက် (Render မှာ APP_PASSWORD ဆိုပြီး ပြောင်းလို့ရပါတယ်)
+# Default ကတော့ '12345' ပါ
+APP_PASSWORD = os.environ.get("APP_PASSWORD", "12345")
+
+# API Key Setup
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
-def generate_content(topic, platform, tone, audience):
-    # သင်စမ်းသပ်ပြီး အဆင်ပြေခဲ့သော Model
-    model = genai.GenerativeModel('gemini-2.5-flash')
+def generate_content(topic, platform, tone, audience, length):
+    model = genai.GenerativeModel('gemini-2.0-flash')
     
-    # Prompt ကို ပိုကောင်းအောင် (Engineering) လုပ်ထားခြင်း
+    # Length ကို Prompt မှာ ထည့်သွင်းခြင်း
+    length_instruction = ""
+    if length == "Short":
+        length_instruction = "Keep it very short, punchy, and concise (under 50 words)."
+    elif length == "Long":
+        length_instruction = "Write a detailed, long-form post with storytelling (over 200 words)."
+    else:
+        length_instruction = "Keep it standard length (around 100-150 words)."
+
     prompt = f"""
-    Act as a professional Social Media Manager for the Myanmar market.
-    Create a high-engagement post for {platform}.
+    Act as a professional Social Media Manager for Myanmar audience.
+    Create a post for {platform}.
     
-    Here are the details:
+    Details:
     - Topic: {topic}
     - Target Audience: {audience}
     - Tone: {tone}
+    - Length Instruction: {length_instruction}
     
     Instructions:
-    1. Start with a 'Hook' (First sentence must grab attention).
-    2. Use natural Burmese (Myanmar) language mixed with English words where appropriate (Burmese-English style).
-    3. Structure the content clearly with line breaks.
-    4. End with a strong Call to Action (CTA).
-    5. Add 5-10 relevant and trending hashtags.
-    6. Use emojis to make it lively.
+    1. Start with a Hook.
+    2. Use natural Burmese mixed with English (Burmese-English style).
+    3. Use emojis and hashtags.
+    4. Include a Call to Action (CTA).
     """
     
     try:
@@ -37,23 +49,40 @@ def generate_content(topic, platform, tone, audience):
     except Exception as e:
         return f"Error: {str(e)}"
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template('index.html')
+    # Login ဝင်မထားရင် Login စာမျက်နှာပြမယ်
+    if not session.get('logged_in'):
+        error = None
+        if request.method == 'POST':
+            if request.form.get('password') == APP_PASSWORD:
+                session['logged_in'] = True
+                return redirect(url_for('home'))
+            else:
+                error = "စကားဝှက် မှားယွင်းနေပါတယ်!"
+        return render_template('index.html', show_login=True, error=error)
+
+    # Login ဝင်ပြီးရင် App ကို ပြမယ်
+    return render_template('index.html', show_login=False)
+
+@app.route('/logout')
+def logout():
+    session.pop('logged_in', None)
+    return redirect(url_for('home'))
 
 @app.route('/generate', methods=['POST'])
 def generate():
+    if not session.get('logged_in'):
+        return jsonify({'result': 'Unauthorized'}), 401
+
     data = request.json
-    topic = data.get('topic')
-    platform = data.get('platform')
-    tone = data.get('tone')
-    audience = data.get('audience') # အသစ်ထပ်ဖြည့်ထားသည်
-
-    if not topic:
-        return jsonify({'result': 'ခေါင်းစဉ်ထည့်ရန် လိုအပ်ပါသည်'}), 400
-
-    content = generate_content(topic, platform, tone, audience)
-    return jsonify({'result': content})
+    return jsonify({'result': generate_content(
+        data.get('topic'), 
+        data.get('platform'), 
+        data.get('tone'), 
+        data.get('audience'),
+        data.get('length') # အသစ်ပါလာတဲ့ Length
+    )})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)
