@@ -42,7 +42,6 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-3">
-                
                 <div>
                     <label class="text-xs font-bold text-purple-600 uppercase tracking-wider">🎯 Content Category</label>
                     <select id="category" class="w-full p-3 border-2 border-purple-100 rounded-xl bg-white outline-none focus:border-purple-500 transition font-bold text-gray-700">
@@ -52,37 +51,33 @@
                         <option value="Copywriting">Copywriting (Sales)</option>
                     </select>
                 </div>
-
                 <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
                     <label class="text-xs font-bold text-purple-600 uppercase block mb-2">👥 Target Audience</label>
                     <div class="grid grid-cols-2 gap-2 mb-2">
                         <select id="age" class="p-2 border rounded-lg text-sm bg-white">
                             <option value="Any Age">Any Age</option>
-                            <option value="13-17 (Gen Z)">13-17 (Teens)</option>
-                            <option value="18-24 (Young Adults)">18-24 (Youth)</option>
-                            <option value="25-34 (Millennials)">25-34 (Adults)</option>
-                            <option value="35-44 (Professionals)">35-44 (Mature)</option>
-                            <option value="45+ (Seniors)">45+ (Seniors)</option>
+                            <option value="13-17 (Gen Z)">13-17</option>
+                            <option value="18-24 (Young Adults)">18-24</option>
+                            <option value="25-34 (Millennials)">25-34</option>
+                            <option value="35-44 (Professionals)">35-44</option>
+                            <option value="45+ (Seniors)">45+</option>
                         </select>
                         <select id="gender" class="p-2 border rounded-lg text-sm bg-white">
-                            <option value="All Genders">All Genders</option>
-                            <option value="Male">Male (ကျား)</option>
-                            <option value="Female">Female (မ)</option>
+                            <option value="All Genders">All</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
                         </select>
                     </div>
-                    <input type="text" id="persona" placeholder="Specific? e.g. Gamers, Moms" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-purple-400">
+                    <input type="text" id="persona" placeholder="Specific? e.g. Gamers" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-purple-400">
                 </div>
-
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase">Topic</label>
                     <input type="text" id="topic" placeholder="e.g. New Product Launch" class="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:ring-2 focus:ring-purple-400 transition">
                 </div>
-
                 <div class="grid grid-cols-2 gap-3">
                     <select id="platform" class="p-3 border rounded-xl bg-gray-50 text-sm"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option><option>TikTok</option></select>
                     <select id="tone" class="p-3 border rounded-xl bg-gray-50 text-sm"><option>Professional</option><option>Funny</option><option>Emotional</option><option>Excited</option></select>
                 </div>
-
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Length</label>
                     <div class="flex bg-gray-100 p-1 rounded-xl">
@@ -92,7 +87,6 @@
                     </div>
                     <input type="hidden" id="length" value="Medium">
                 </div>
-
                 <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex justify-center items-center gap-2">
                     <span>✨ Generate Post</span>
                 </button>
@@ -143,7 +137,6 @@
                 category: document.getElementById('category').value,
                 tone: document.getElementById('tone').value,
                 length: document.getElementById('length').value,
-                // New Fields
                 age: document.getElementById('age').value,
                 gender: document.getElementById('gender').value,
                 persona: document.getElementById('persona').value
@@ -165,14 +158,19 @@
                 
                 const json = await res.json();
                 
+                // ERROR FIX IS HERE: Check if post_content exists
+                const rawContent = json.post_content || "Content generation incomplete. Please try again.";
+                
                 // Text
-                const htmlContent = marked.parse(json.post_content);
+                const htmlContent = marked.parse(rawContent);
                 document.getElementById('contentText').innerHTML = htmlContent;
                 document.getElementById('mobileText').innerHTML = htmlContent;
-                document.getElementById('rawText').value = json.post_content;
+                document.getElementById('rawText').value = rawContent;
 
                 // Image
-                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(json.image_prompt)}?nologo=true&width=800&height=600&seed=${Math.random()}`;
+                const prompt = json.image_prompt || "Abstract social media background";
+                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&width=800&height=600&seed=${Math.random()}`;
+                
                 const img = document.getElementById('aiImage');
                 img.src = imgUrl;
                 img.onload = () => img.classList.remove('hidden');
@@ -192,7 +190,9 @@
         }
 
         function copyText() {
-            navigator.clipboard.writeText(document.getElementById('rawText').value);
+            const text = document.getElementById('rawText').value;
+            if(!text) return;
+            navigator.clipboard.writeText(text);
             alert("စာသား ကူးယူပြီးပါပြီ!");
         }
     </script>
