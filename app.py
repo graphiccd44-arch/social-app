@@ -9,8 +9,23 @@ app.secret_key = os.environ.get("SECRET_KEY", "mysecretkey123")
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "12345")
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
-def generate_content(topic, platform, tone, age, gender, persona, length, category, language, ai_model):
+def generate_content(data):
+    # Extract Data
+    topic = data.get('topic')
+    platform = data.get('platform', 'Facebook')
+    tone = data.get('tone', 'Professional')
+    age = data.get('age', 'Any')
+    gender = data.get('gender', 'All')
+    persona = data.get('persona', '')
+    length = data.get('length', 'Medium')
+    category = data.get('category', 'Awareness')
+    language = data.get('language', 'Myanglish')
+    ai_model = data.get('ai_model', 'Gemini 2.5 Flash')
     
+    # Refinement Mode (Magic Buttons)
+    refine_instruction = data.get('refine_instruction')
+    current_text = data.get('current_text')
+
     # Model Selection
     target_model_id = 'gemini-2.0-flash' 
     if ai_model == "Gemini 3.0 Pro": target_model_id = 'gemini-3-pro-preview'
@@ -22,37 +37,55 @@ def generate_content(topic, platform, tone, age, gender, persona, length, catego
     except:
         model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json"})
 
-    # Prompt Engineering for Spacing
-    length_instruction = "standard length (100-150 words)"
-    if length == "Short": length_instruction = "short (under 50 words)"
-    elif length == "Long": length_instruction = "long (over 200 words)"
+    # Logic Switch: Refinement vs New Generation
+    if refine_instruction and current_text:
+        # --- REFINEMENT PROMPT ---
+        prompt = f"""
+        Act as a Professional Editor.
+        Original Text: "{current_text}"
+        
+        Task: Rewrite the text above based on this instruction: "{refine_instruction}"
+        
+        Constraints:
+        - Keep the same language style ({language}).
+        - Keep formatting suitable for {platform}.
+        
+        Output strictly in JSON format with a single key: "post_content".
+        """
+    else:
+        # --- NEW GENERATION PROMPT ---
+        audience_profile = f"{gender}, aged {age}"
+        if persona: audience_profile += f", specifically {persona}"
 
-    lang_instruction = "Burmese (Myanmar) mixed with English keywords naturally (Myanglish)."
-    if language == "Pure Burmese": lang_instruction = "STRICTLY BURMESE (Myanmar) ONLY."
-    elif language == "English Only": lang_instruction = "STRICTLY ENGLISH ONLY."
+        length_instr = "100-150 words"
+        if length == "Short": length_instr = "under 50 words"
+        elif length == "Long": length_instr = "over 200 words"
 
-    model_persona = "You are an expert Social Media Copywriter."
-    if ai_model == "DeepSeek": model_persona = "Act as DeepSeek. Logical and structured."
-    elif ai_model == "ChatGPT": model_persona = "Act as ChatGPT. Friendly and conversational."
+        lang_instr = "Burmese (Myanmar) mixed with English keywords naturally (Myanglish)."
+        if language == "Pure Burmese": lang_instr = "STRICTLY BURMESE ONLY."
+        elif language == "English Only": lang_instr = "STRICTLY ENGLISH ONLY."
 
-    prompt = f"""
-    {model_persona}
-    Platform: {platform}
-    Topic: {topic}
-    Target Audience: {gender}, aged {age} ({persona})
-    Goal: {category}
-    Tone: {tone}
-    Length: {length_instruction}
-    LANGUAGE: {lang_instruction}
+        model_persona = "You are an expert Social Media Manager."
+        if ai_model == "DeepSeek": model_persona = "Act as DeepSeek. Logical, factual."
+        elif ai_model == "ChatGPT": model_persona = "Act as ChatGPT. Conversational, creative."
 
-    FORMATTING RULES:
-    1. Do NOT use Markdown headers (#).
-    2. Use Bold (**) for key points.
-    3. CRITICAL: Use double line breaks between paragraphs to make it easy to read on mobile.
-    4. Use bullet points or emojis for lists, not numbered lists.
-    
-    Output strictly in JSON format with a single key: "post_content".
-    """
+        prompt = f"""
+        {model_persona}
+        Platform: {platform}
+        Topic: {topic}
+        Audience: {audience_profile}
+        Goal: {category}
+        Tone: {tone}
+        Length: {length_instr}
+        LANGUAGE: {lang_instr}
+
+        FORMATTING:
+        - Use Line breaks for readability.
+        - Use Bold (**) for emphasis.
+        - Use Emojis.
+
+        Output strictly in JSON format with a single key: "post_content".
+        """
     
     try:
         response = model.generate_content(prompt)
@@ -92,12 +125,7 @@ def logout():
 def generate():
     if not session.get('logged_in'): return jsonify({'result': 'Unauthorized'}), 401
     data = request.json
-    result = generate_content(
-        data.get('topic', ''), data.get('platform', 'Facebook'), data.get('tone', 'Professional'),
-        data.get('age', 'Any Age'), data.get('gender', 'All'), data.get('persona', ''),
-        data.get('length', 'Medium'), data.get('category', 'Brand Awareness'),
-        data.get('language', 'Myanglish'), data.get('ai_model', 'Gemini 2.5 Flash')
-    )
+    result = generate_content(data)
     return jsonify(result)
 
 if __name__ == '__main__':
