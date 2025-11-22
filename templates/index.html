@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Content Suite</title>
+    <title>Creative AI Content</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -12,6 +12,9 @@
         .preview-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
         .loader { width: 18px; height: 18px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Custom Button Select Styles */
+        .btn-select { cursor: pointer; transition: all 0.2s; border: 1px solid #e5e7eb; }
+        .btn-select.active { background: #2563eb; color: white; border-color: #2563eb; }
     </style>
 </head>
 <body class="min-h-screen p-4 flex justify-center">
@@ -30,28 +33,42 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-7xl">
         <div class="lg:col-span-5 bg-white p-6 rounded-xl shadow-sm h-fit">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="text-xl font-bold text-blue-600"><i class="fas fa-magic"></i> AI Suite</h1>
+                <h1 class="text-xl font-bold text-blue-600"><i class="fas fa-brain mr-2"></i>Creative AI</h1>
                 <a href="/logout" class="text-gray-400 hover:text-red-500"><i class="fas fa-power-off"></i></a>
             </div>
             <div class="space-y-4">
-                <input type="text" id="topic" placeholder="Topic..." class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-blue-500">
+                
+                <input type="text" id="topic" placeholder="What to write about?" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+
                 <div class="grid grid-cols-2 gap-2">
                     <select id="ai_model" class="p-2 border rounded-lg text-sm bg-blue-50 font-bold text-blue-700"><option>Gemini 2.5 Flash</option><option>Gemini 3.0 Pro</option><option>DeepSeek</option><option>ChatGPT</option></select>
                     <select id="language" class="p-2 border rounded-lg text-sm bg-blue-50 font-bold text-blue-700"><option>Myanglish</option><option>Pure Burmese</option><option>English Only</option></select>
                 </div>
+
                 <div class="bg-gray-50 p-3 rounded-lg border">
-                    <div class="flex justify-between mb-2"><span class="text-xs font-bold text-gray-500 uppercase">Target</span></div>
-                    <div class="grid grid-cols-2 gap-2 mb-2">
-                        <select id="age" class="p-2 border rounded text-sm bg-white"><option>18-24</option><option>25-34</option><option>35-44</option><option>Any</option></select>
-                        <select id="gender" class="p-2 border rounded text-sm bg-white"><option>All</option><option>Female</option><option>Male</option></select>
+                    <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">Creativity Level</label>
+                    <select id="creativity" class="w-full p-2 border rounded text-sm mb-3 font-medium">
+                        <option value="Standard">Standard (ရိုးရိုး)</option>
+                        <option value="Storytelling">Storytelling (ဇာတ်လမ်းဆင်)</option>
+                        <option value="Viral/Hook">Viral Hook (ပေါက်အောင်ရေး)</option>
+                        <option value="Direct/Sales">Direct Sales (ရောင်းစကား)</option>
+                    </select>
+
+                    <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">Length</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div onclick="setLength('Short')" id="lenShort" class="btn-select p-2 rounded text-center text-xs font-bold text-gray-600 bg-white">Short</div>
+                        <div onclick="setLength('Medium')" id="lenMedium" class="btn-select active p-2 rounded text-center text-xs font-bold text-gray-600 bg-white">Medium</div>
+                        <div onclick="setLength('Long')" id="lenLong" class="btn-select p-2 rounded text-center text-xs font-bold text-gray-600 bg-white">Long</div>
                     </div>
-                    <input type="text" id="persona" placeholder="e.g. Gamers" class="w-full p-2 border rounded text-sm">
+                    <input type="hidden" id="length" value="Medium">
                 </div>
+
                 <div class="grid grid-cols-2 gap-2">
                     <select id="platform" class="p-2 border rounded text-sm bg-gray-50" onchange="renderPreview()"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option><option>TikTok</option></select>
                     <select id="tone" class="p-2 border rounded text-sm bg-gray-50"><option>Professional</option><option>Funny</option><option>Emotional</option></select>
                 </div>
-                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-lg shadow hover:shadow-lg flex justify-center items-center gap-2">Generate</button>
+
+                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-lg shadow hover:shadow-lg flex justify-center items-center gap-2">Generate Magic</button>
                 
                 <div class="mt-4 pt-4 border-t">
                     <h3 class="text-xs font-bold text-gray-400 uppercase mb-2">History</h3>
@@ -61,14 +78,14 @@
         </div>
 
         <div class="lg:col-span-7 bg-white p-6 rounded-xl shadow-sm min-h-[600px] flex flex-col">
-            <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Preview</h3>
+            <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Live Preview</h3>
             <div id="previewContainer" class="flex-grow">
-                <div class="flex flex-col items-center justify-center h-64 text-gray-300"><i class="fas fa-mobile-alt text-5xl mb-2"></i><p>Ready to generate</p></div>
+                <div class="flex flex-col items-center justify-center h-64 text-gray-300"><i class="fas fa-mobile-alt text-5xl mb-2"></i><p>Result will appear here</p></div>
             </div>
             <div id="magicButtons" class="hidden mt-4 pt-4 border-t flex flex-wrap gap-2">
                 <button onclick="refine('Shorten it')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">✂️ Shorten</button>
                 <button onclick="refine('Add emojis')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">😍 Emojis</button>
-                <button onclick="refine('Fix grammar')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">✅ Polish</button>
+                <button onclick="refine('Make it more engaging')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">🔥 Spicy</button>
                 <button onclick="copyText()" class="ml-auto bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-100">Copy</button>
             </div>
             <textarea id="rawText" class="hidden"></textarea>
@@ -77,14 +94,20 @@
 
     <script>
         window.onload = loadHistory;
+        
+        function setLength(val) {
+            document.getElementById('length').value = val;
+            ['lenShort', 'lenMedium', 'lenLong'].forEach(id => document.getElementById(id).classList.remove('active'));
+            document.getElementById('len' + val).classList.add('active');
+        }
+
         async function generate(refineInstr = null) {
             const data = {
                 topic: document.getElementById('topic').value,
                 platform: document.getElementById('platform').value,
                 tone: document.getElementById('tone').value,
-                age: document.getElementById('age').value,
-                gender: document.getElementById('gender').value,
-                persona: document.getElementById('persona').value,
+                length: document.getElementById('length').value,
+                creativity: document.getElementById('creativity').value, // New
                 language: document.getElementById('language').value,
                 ai_model: document.getElementById('ai_model').value,
                 refine_instruction: refineInstr,
@@ -102,7 +125,7 @@
                 document.getElementById('magicButtons').classList.remove('hidden');
                 if(!refineInstr) saveHistory(data.topic, content);
             } catch (e) { alert("Error: " + e); } 
-            finally { btn.innerHTML = 'Generate'; btn.disabled = false; }
+            finally { btn.innerHTML = 'Generate Magic'; btn.disabled = false; }
         }
         function refine(instr) { generate(instr); }
         function renderPreview(text = null) {
