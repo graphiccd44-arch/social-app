@@ -10,13 +10,13 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
         body { font-family: 'Padauk', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); } /* Dark Mode Style */
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #334155 100%); }
         .loader { width: 20px; height: 20px; border: 3px solid #fff; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .prose h1, .prose h2 { font-weight: bold; margin-bottom: 0.5rem; }
+        .prose h1, .prose h2 { font-weight: bold; margin-bottom: 0.5rem; color: #1e293b; }
         .prose p { margin-bottom: 0.8rem; }
         .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.8rem; }
-        .prose strong { color: #3b82f6; }
+        .prose strong { color: #2563eb; }
     </style>
 </head>
 <body class="gradient-bg min-h-screen flex items-center justify-center p-4">
@@ -37,7 +37,7 @@
         
         <div class="text-center mb-6">
             <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Ultimate AI Content</h1>
-            <p class="text-gray-500 text-sm mt-1">Powered by Gemini 2.0 Flash</p>
+            <p class="text-gray-500 text-sm mt-1">Updated with Gemini 3.0 Pro</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -47,7 +47,8 @@
                     <div>
                         <label class="text-xs font-bold text-blue-600 uppercase">🤖 AI Model</label>
                         <select id="ai_model" class="w-full p-2 border-2 border-blue-100 rounded-lg text-sm font-bold text-gray-700 bg-blue-50">
-                            <option value="Gemini">Gemini 2.0</option>
+                            <option value="Gemini 3.0 Pro">Gemini 3.0 Pro 🔥</option>
+                            <option value="Gemini 2.5 Flash" selected>Gemini 2.5 Flash ⚡</option>
                             <option value="DeepSeek">DeepSeek Style</option>
                             <option value="ChatGPT">ChatGPT Style</option>
                         </select>
@@ -103,7 +104,7 @@
                 </div>
 
                 <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex justify-center items-center gap-2">
-                    <span>✨ Generate Content</span>
+                    <span>✨ Generate with Gemini 3.0</span>
                 </button>
             </div>
 
@@ -200,7 +201,7 @@
             } catch (e) {
                 alert("Error: " + e);
             } finally {
-                btn.innerHTML = '<span>✨ Generate Content</span>';
+                btn.innerHTML = '<span>✨ Generate with Gemini 3.0</span>';
                 btn.disabled = false;
             }
         }
