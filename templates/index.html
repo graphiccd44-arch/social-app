@@ -3,128 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Content Text Only</title>
+    <title>AI Content Social View</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
-        body { font-family: 'Padauk', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #111827 0%, #1f2937 100%); }
-        .loader { width: 20px; height: 20px; border: 3px solid #fff; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        body { font-family: 'Inter', 'Padauk', sans-serif; }
+        .gradient-bg { background: #f0f2f5; } /* Facebook Background Color */
+        
+        /* Facebook-like Post Styling */
+        .fb-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .fb-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #050505;
+            white-space: pre-wrap; /* Keeps formatting */
+        }
+        /* loader */
+        .loader { width: 18px; height: 18px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .prose h1, .prose h2 { font-weight: bold; margin-bottom: 0.5rem; color: #1f2937; }
-        .prose p { margin-bottom: 0.8rem; }
-        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.8rem; }
-        .prose strong { color: #2563eb; }
     </style>
 </head>
 <body class="gradient-bg min-h-screen flex items-center justify-center p-4">
 
     {% if show_login %}
-    <div class="bg-white/90 backdrop-blur p-8 rounded-3xl shadow-2xl w-full max-w-md">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
         <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">🔒 Login</h2>
         {% if error %}<p class="text-red-500 text-center mb-4 text-sm">{{ error }}</p>{% endif %}
         <form method="POST">
-            <input type="password" name="password" placeholder="Password..." required class="w-full p-4 border border-gray-200 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-500">
-            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">ENTER</button>
+            <input type="password" name="password" placeholder="Password..." required class="w-full p-3 border rounded-lg mb-4 outline-none focus:border-blue-500">
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Log In</button>
         </form>
     </div>
     {% else %}
     
-    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-4xl relative">
-        <a href="/logout" class="absolute top-6 right-6 text-gray-400 hover:text-red-500"><i class="fas fa-sign-out-alt"></i></a>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-6xl">
         
-        <div class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">AI Content Generator</h1>
-            <p class="text-gray-500 text-sm mt-1">Text Only Mode</p>
-        </div>
+        <div class="lg:col-span-5 bg-white p-6 rounded-xl shadow-sm h-fit">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-xl font-bold text-blue-600"><i class="fas fa-robot mr-2"></i>AI Generator</h1>
+                <a href="/logout" class="text-gray-400 hover:text-red-500 text-sm"><i class="fas fa-power-off"></i></a>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-4">
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-xs font-bold text-blue-600 uppercase">🤖 AI Model</label>
-                        <select id="ai_model" class="w-full p-2 border-2 border-blue-100 rounded-lg text-sm font-bold text-gray-700 bg-blue-50">
-                            <option value="Gemini 3.0 Pro">Gemini 3.0 Pro</option>
-                            <option value="Gemini 2.5 Flash" selected>Gemini 2.5 Flash</option>
-                            <option value="DeepSeek">DeepSeek Style</option>
-                            <option value="ChatGPT">ChatGPT Style</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-blue-600 uppercase">🗣️ Language</label>
-                        <select id="language" class="w-full p-2 border-2 border-blue-100 rounded-lg text-sm font-bold text-gray-700 bg-blue-50">
-                            <option value="Myanglish">Myanglish</option>
-                            <option value="Pure Burmese">Pure Burmese</option>
-                            <option value="English Only">English Only</option>
-                        </select>
-                    </div>
-                </div>
-
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase">Topic</label>
-                    <input type="text" id="topic" placeholder="e.g. 50% Discount" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition">
+                    <input type="text" id="topic" placeholder="e.g. Summer Sale 50%" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-blue-500 transition">
                 </div>
 
-                <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
-                    <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Target Audience</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Model</label>
+                        <select id="ai_model" class="w-full p-2 border rounded-lg text-sm bg-gray-50 font-semibold">
+                            <option>Gemini 3.0 Pro</option>
+                            <option selected>Gemini 2.5 Flash</option>
+                            <option>DeepSeek</option>
+                            <option>ChatGPT</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Language</label>
+                        <select id="language" class="w-full p-2 border rounded-lg text-sm bg-gray-50 font-semibold">
+                            <option>Myanglish</option>
+                            <option>Pure Burmese</option>
+                            <option>English Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <label class="text-xs font-bold text-blue-600 uppercase mb-2 block">Target Audience</label>
                     <div class="grid grid-cols-2 gap-2 mb-2">
-                        <select id="age" class="p-2 border rounded-lg text-sm"><option>Any Age</option><option>18-24</option><option>25-34</option><option>35-44</option></select>
-                        <select id="gender" class="p-2 border rounded-lg text-sm"><option>All</option><option>Male</option><option>Female</option></select>
+                        <select id="age" class="p-2 border rounded text-sm bg-white"><option>18-24</option><option>25-34</option><option>35-44</option><option>Any</option></select>
+                        <select id="gender" class="p-2 border rounded text-sm bg-white"><option>All</option><option>Female</option><option>Male</option></select>
                     </div>
-                    <input type="text" id="persona" placeholder="Specific? e.g. Gamers" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-400">
+                    <input type="text" id="persona" placeholder="Persona? (e.g. Gamers)" class="w-full p-2 border rounded text-sm">
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Category</label>
-                        <select id="category" class="w-full p-2 border rounded-lg text-sm"><option>Brand Awareness</option><option>Engagement</option><option>Educational</option><option>Copywriting</option></select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Platform</label>
-                        <select id="platform" class="w-full p-2 border rounded-lg text-sm"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option><option>TikTok</option></select>
-                    </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <select id="platform" class="p-2 border rounded text-sm bg-gray-50"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option></select>
+                    <select id="category" class="p-2 border rounded text-sm bg-gray-50"><option>Awareness</option><option>Sales</option><option>Engagement</option></select>
+                    <select id="tone" class="p-2 border rounded text-sm bg-gray-50"><option>Pro</option><option>Funny</option><option>Emotional</option></select>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Tone</label>
-                        <select id="tone" class="w-full p-2 border rounded-lg text-sm"><option>Professional</option><option>Funny</option><option>Emotional</option></select>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Length</label>
-                        <select id="length" class="w-full p-2 border rounded-lg text-sm"><option>Short</option><option value="Medium" selected>Medium</option><option>Long</option></select>
-                    </div>
-                 </div>
+                <select id="length" class="w-full p-2 border rounded text-sm bg-gray-50"><option>Short</option><option selected>Medium</option><option>Long</option></select>
 
-                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex justify-center items-center gap-2">
-                    <span>✨ Generate Text</span>
+                <button onclick="generate()" id="genBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition flex justify-center items-center gap-2">
+                    <span>Create Post</span>
                 </button>
             </div>
+        </div>
 
-            <div id="outputArea" class="hidden md:block border-l pl-0 md:pl-8 border-gray-200">
-                <div class="flex justify-between items-center mb-4">
-                    <span class="text-sm font-bold text-gray-400 uppercase">Generated Content</span>
-                    <button onclick="copyText()" class="bg-blue-100 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-200 transition">
-                        <i class="fas fa-copy mr-1"></i> Copy
-                    </button>
+        <div class="lg:col-span-7 flex flex-col items-center justify-start pt-4">
+            <div class="w-full max-w-md">
+                <h3 class="text-sm font-bold text-gray-400 uppercase mb-3 tracking-wider">Preview</h3>
+                
+                <div class="fb-card p-4 mb-4 hidden" id="resultCard">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                            <i class="fas fa-user text-gray-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <div class="font-bold text-gray-900 text-sm">Your Page Name</div>
+                            <div class="text-xs text-gray-500 flex items-center">
+                                Just now · <i class="fas fa-globe-americas ml-1 text-[10px]"></i>
+                            </div>
+                        </div>
+                        <div class="ml-auto text-gray-400"><i class="fas fa-ellipsis-h"></i></div>
+                    </div>
+
+                    <div id="postContent" class="fb-text mb-4"></div>
+
+                    <div class="border-t pt-2 flex justify-between text-gray-500 text-sm font-semibold px-4">
+                        <div class="cursor-pointer hover:bg-gray-100 py-2 px-6 rounded"><i class="far fa-thumbs-up mr-2"></i>Like</div>
+                        <div class="cursor-pointer hover:bg-gray-100 py-2 px-6 rounded"><i class="far fa-comment-alt mr-2"></i>Comment</div>
+                        <div class="cursor-pointer hover:bg-gray-100 py-2 px-6 rounded"><i class="fas fa-share mr-2"></i>Share</div>
+                    </div>
                 </div>
                 
-                <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200 h-[500px] overflow-y-auto shadow-inner">
-                    <div id="contentText" class="prose prose-blue max-w-none text-gray-700 text-base leading-relaxed"></div>
-                </div>
+                <button id="copyBtn" onclick="copyText()" class="hidden w-full bg-white border border-gray-300 text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-50 transition">
+                    <i class="far fa-copy mr-2"></i> Copy Text
+                </button>
+                
                 <input type="hidden" id="rawText">
-            </div>
-        </div>
-        
-        <div id="mobileResult" class="md:hidden mt-6 hidden">
-            <hr class="my-4">
-            <h3 class="font-bold mb-2 text-blue-600">Result:</h3>
-            <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                <div id="mobileText" class="prose text-sm text-gray-700"></div>
-                <button onclick="copyText()" class="mt-3 w-full bg-blue-100 text-blue-600 py-2 rounded-lg text-xs font-bold">Copy Text</button>
+
+                <div id="emptyState" class="text-center text-gray-400 mt-10">
+                    <i class="fas fa-pen-nib text-4xl mb-2 opacity-30"></i>
+                    <p>Post preview will appear here.</p>
+                </div>
             </div>
         </div>
 
@@ -143,10 +153,9 @@
                 persona: document.getElementById('persona').value,
                 language: document.getElementById('language').value,
                 ai_model: document.getElementById('ai_model').value
-                // art_style removed
             };
 
-            if(!data.topic) return alert("Topic ထည့်ပါဦး!");
+            if(!data.topic) return alert("Please enter a topic!");
 
             const btn = document.getElementById('genBtn');
             btn.innerHTML = '<div class="loader"></div>';
@@ -161,21 +170,24 @@
                 if(res.status === 401) return location.reload();
                 
                 const json = await res.json();
-                const rawContent = json.post_content || "Error processing text.";
+                let rawContent = json.post_content || "Error processing text.";
                 
-                // Text Only
-                const htmlContent = marked.parse(rawContent);
-                document.getElementById('contentText').innerHTML = htmlContent;
-                document.getElementById('mobileText').innerHTML = htmlContent;
+                // Simple formatting: Convert **bold** to <b>bold</b> for display
+                let formattedContent = rawContent
+                    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') // Bold
+                    .replace(/\n/g, '<br>'); // Line breaks
+
+                document.getElementById('postContent').innerHTML = formattedContent;
                 document.getElementById('rawText').value = rawContent;
 
-                document.getElementById('outputArea').classList.remove('hidden');
-                document.getElementById('mobileResult').classList.remove('hidden');
+                document.getElementById('resultCard').classList.remove('hidden');
+                document.getElementById('copyBtn').classList.remove('hidden');
+                document.getElementById('emptyState').classList.add('hidden');
 
             } catch (e) {
                 alert("Error: " + e);
             } finally {
-                btn.innerHTML = '<span>✨ Generate Text</span>';
+                btn.innerHTML = '<span>Create Post</span>';
                 btn.disabled = false;
             }
         }
@@ -184,7 +196,7 @@
             const text = document.getElementById('rawText').value;
             if(!text) return;
             navigator.clipboard.writeText(text);
-            alert("Copied!");
+            alert("Copied to clipboard!");
         }
     </script>
     {% endif %}
