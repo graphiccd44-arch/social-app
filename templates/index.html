@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Content Pro</title>
+    <title>Ultimate AI Content</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
         body { font-family: 'Padauk', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%); }
+        .gradient-bg { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); } /* Dark Mode Style */
         .loader { width: 20px; height: 20px; border: 3px solid #fff; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .prose h1, .prose h2 { font-weight: bold; margin-bottom: 0.5rem; }
         .prose p { margin-bottom: 0.8rem; }
         .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.8rem; }
-        .prose strong { color: #9333ea; }
+        .prose strong { color: #3b82f6; }
     </style>
 </head>
 <body class="gradient-bg min-h-screen flex items-center justify-center p-4">
@@ -26,84 +26,99 @@
         <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">🔒 Login</h2>
         {% if error %}<p class="text-red-500 text-center mb-4 text-sm">{{ error }}</p>{% endif %}
         <form method="POST">
-            <input type="password" name="password" placeholder="Password..." required class="w-full p-4 border border-gray-200 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-purple-400">
-            <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition">ENTER</button>
+            <input type="password" name="password" placeholder="Password..." required class="w-full p-4 border border-gray-200 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition">ENTER</button>
         </form>
     </div>
     {% else %}
     
-    <div class="bg-white/95 backdrop-blur p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-3xl relative">
+    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-3xl relative">
         <a href="/logout" class="absolute top-6 right-6 text-gray-400 hover:text-red-500"><i class="fas fa-sign-out-alt"></i></a>
         
         <div class="text-center mb-6">
-            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">AI Content Generator</h1>
-            <p class="text-gray-500 text-sm mt-1">Smart Targeting System</p>
+            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Ultimate AI Content</h1>
+            <p class="text-gray-500 text-sm mt-1">Powered by Gemini 2.0 Flash</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-3">
-                <div>
-                    <label class="text-xs font-bold text-purple-600 uppercase tracking-wider">🎯 Content Category</label>
-                    <select id="category" class="w-full p-3 border-2 border-purple-100 rounded-xl bg-white outline-none focus:border-purple-500 transition font-bold text-gray-700">
-                        <option value="Brand Awareness">Brand Awareness</option>
-                        <option value="Engagement">Engagement</option>
-                        <option value="Educational">Educational</option>
-                        <option value="Copywriting">Copywriting (Sales)</option>
-                    </select>
-                </div>
-                <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
-                    <label class="text-xs font-bold text-purple-600 uppercase block mb-2">👥 Target Audience</label>
-                    <div class="grid grid-cols-2 gap-2 mb-2">
-                        <select id="age" class="p-2 border rounded-lg text-sm bg-white">
-                            <option value="Any Age">Any Age</option>
-                            <option value="13-17 (Gen Z)">13-17</option>
-                            <option value="18-24 (Young Adults)">18-24</option>
-                            <option value="25-34 (Millennials)">25-34</option>
-                            <option value="35-44 (Professionals)">35-44</option>
-                            <option value="45+ (Seniors)">45+</option>
-                        </select>
-                        <select id="gender" class="p-2 border rounded-lg text-sm bg-white">
-                            <option value="All Genders">All</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-bold text-blue-600 uppercase">🤖 AI Model</label>
+                        <select id="ai_model" class="w-full p-2 border-2 border-blue-100 rounded-lg text-sm font-bold text-gray-700 bg-blue-50">
+                            <option value="Gemini">Gemini 2.0</option>
+                            <option value="DeepSeek">DeepSeek Style</option>
+                            <option value="ChatGPT">ChatGPT Style</option>
                         </select>
                     </div>
-                    <input type="text" id="persona" placeholder="Specific? e.g. Gamers" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-purple-400">
+                    <div>
+                        <label class="text-xs font-bold text-blue-600 uppercase">🗣️ Language</label>
+                        <select id="language" class="w-full p-2 border-2 border-blue-100 rounded-lg text-sm font-bold text-gray-700 bg-blue-50">
+                            <option value="Myanglish">Myanglish (Mix)</option>
+                            <option value="Pure Burmese">Pure Burmese</option>
+                            <option value="English Only">English Only</option>
+                        </select>
+                    </div>
                 </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Category</label>
+                        <select id="category" class="w-full p-2 border rounded-lg text-sm"><option>Brand Awareness</option><option>Engagement</option><option>Educational</option><option>Copywriting</option></select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase">Art Style</label>
+                        <select id="art_style" class="w-full p-2 border rounded-lg text-sm"><option>Realistic</option><option>3D Render</option><option>Anime</option><option>Cinematic</option></select>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded-xl border border-gray-200">
+                    <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Target Audience</label>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <select id="age" class="p-2 border rounded-lg text-sm"><option>Any Age</option><option>18-24</option><option>25-34</option><option>35-44</option></select>
+                        <select id="gender" class="p-2 border rounded-lg text-sm"><option>All</option><option>Male</option><option>Female</option></select>
+                    </div>
+                    <input type="text" id="persona" placeholder="Specific? e.g. Gamers" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-blue-400">
+                </div>
+
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase">Topic</label>
-                    <input type="text" id="topic" placeholder="e.g. New Product Launch" class="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:ring-2 focus:ring-purple-400 transition">
+                    <input type="text" id="topic" placeholder="e.g. 50% Discount" class="w-full p-3 border rounded-xl outline-none focus:ring-2 focus:ring-blue-400 transition">
                 </div>
+
                 <div class="grid grid-cols-2 gap-3">
-                    <select id="platform" class="p-3 border rounded-xl bg-gray-50 text-sm"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option><option>TikTok</option></select>
-                    <select id="tone" class="p-3 border rounded-xl bg-gray-50 text-sm"><option>Professional</option><option>Funny</option><option>Emotional</option><option>Excited</option></select>
+                    <select id="platform" class="p-2 border rounded-lg text-sm"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option><option>TikTok</option></select>
+                    <select id="tone" class="p-2 border rounded-lg text-sm"><option>Professional</option><option>Funny</option><option>Emotional</option></select>
                 </div>
+
                 <div>
                     <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Length</label>
                     <div class="flex bg-gray-100 p-1 rounded-xl">
                         <button onclick="setLen('Short')" class="l-btn flex-1 py-2 rounded-lg text-xs font-bold text-gray-500 hover:bg-white">Short</button>
-                        <button onclick="setLen('Medium')" class="l-btn flex-1 py-2 rounded-lg text-xs font-bold bg-white shadow text-purple-600">Medium</button>
+                        <button onclick="setLen('Medium')" class="l-btn flex-1 py-2 rounded-lg text-xs font-bold bg-white shadow text-blue-600">Medium</button>
                         <button onclick="setLen('Long')" class="l-btn flex-1 py-2 rounded-lg text-xs font-bold text-gray-500 hover:bg-white">Long</button>
                     </div>
                     <input type="hidden" id="length" value="Medium">
                 </div>
-                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex justify-center items-center gap-2">
-                    <span>✨ Generate Post</span>
+
+                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex justify-center items-center gap-2">
+                    <span>✨ Generate Content</span>
                 </button>
             </div>
 
             <div id="outputArea" class="hidden md:block border-l pl-0 md:pl-6 border-gray-200">
                 <div class="mb-4">
                     <span class="text-xs font-bold text-gray-400 uppercase">AI Image</span>
-                    <div id="imgContainer" class="w-full h-48 bg-gray-200 rounded-xl overflow-hidden mt-2 relative">
-                        <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">Image loading...</div>
-                        <img id="aiImage" class="w-full h-full object-cover hidden" alt="AI Art">
+                    <div id="imgContainer" class="w-full h-48 bg-gray-200 rounded-xl overflow-hidden mt-2 relative shadow-inner">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">Generating Art...</div>
+                        <img id="aiImage" class="w-full h-full object-cover hidden hover:scale-105 transition duration-500" alt="AI Art">
                     </div>
                 </div>
                 <div>
                     <div class="flex justify-between items-end mb-2">
                         <span class="text-xs font-bold text-gray-400 uppercase">Caption</span>
-                        <button onclick="copyText()" class="text-purple-600 text-xs font-bold hover:underline">Copy Text</button>
+                        <button onclick="copyText()" class="text-blue-600 text-xs font-bold hover:underline">Copy Text</button>
                     </div>
                     <div id="contentText" class="prose text-sm text-gray-700 h-64 overflow-y-auto pr-2"></div>
                     <input type="hidden" id="rawText">
@@ -113,7 +128,7 @@
         
         <div id="mobileResult" class="md:hidden mt-6 hidden">
             <hr class="my-4">
-            <h3 class="font-bold mb-2 text-purple-600">Generated Result:</h3>
+            <h3 class="font-bold mb-2 text-blue-600">Result:</h3>
             <img id="mobileImage" class="w-full rounded-xl mb-4 hidden">
             <div id="mobileText" class="prose text-sm text-gray-700"></div>
         </div>
@@ -124,9 +139,9 @@
         function setLen(val) {
             document.getElementById('length').value = val;
             document.querySelectorAll('.l-btn').forEach(b => {
-                b.classList.remove('bg-white', 'shadow', 'text-purple-600');
+                b.classList.remove('bg-white', 'shadow', 'text-blue-600');
                 b.classList.add('text-gray-500');
-                if(b.innerText === val) { b.classList.add('bg-white', 'shadow', 'text-purple-600'); b.classList.remove('text-gray-500'); }
+                if(b.innerText === val) { b.classList.add('bg-white', 'shadow', 'text-blue-600'); b.classList.remove('text-gray-500'); }
             });
         }
 
@@ -139,7 +154,10 @@
                 length: document.getElementById('length').value,
                 age: document.getElementById('age').value,
                 gender: document.getElementById('gender').value,
-                persona: document.getElementById('persona').value
+                persona: document.getElementById('persona').value,
+                language: document.getElementById('language').value,
+                art_style: document.getElementById('art_style').value,
+                ai_model: document.getElementById('ai_model').value
             };
 
             if(!data.topic) return alert("Topic ထည့်ပါဦး!");
@@ -157,9 +175,7 @@
                 if(res.status === 401) return location.reload();
                 
                 const json = await res.json();
-                
-                // ERROR FIX IS HERE: Check if post_content exists
-                const rawContent = json.post_content || "Content generation incomplete. Please try again.";
+                const rawContent = json.post_content || "Error processing text.";
                 
                 // Text
                 const htmlContent = marked.parse(rawContent);
@@ -168,7 +184,7 @@
                 document.getElementById('rawText').value = rawContent;
 
                 // Image
-                const prompt = json.image_prompt || "Abstract social media background";
+                const prompt = json.image_prompt || "Abstract art";
                 const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?nologo=true&width=800&height=600&seed=${Math.random()}`;
                 
                 const img = document.getElementById('aiImage');
@@ -184,7 +200,7 @@
             } catch (e) {
                 alert("Error: " + e);
             } finally {
-                btn.innerHTML = '<span>✨ Generate Post</span>';
+                btn.innerHTML = '<span>✨ Generate Content</span>';
                 btn.disabled = false;
             }
         }
@@ -193,7 +209,7 @@
             const text = document.getElementById('rawText').value;
             if(!text) return;
             navigator.clipboard.writeText(text);
-            alert("စာသား ကူးယူပြီးပါပြီ!");
+            alert("Copied!");
         }
     </script>
     {% endif %}
