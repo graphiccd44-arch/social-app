@@ -10,56 +10,57 @@ APP_PASSWORD = os.environ.get("APP_PASSWORD", "12345")
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
 def generate_content(topic, platform, tone, age, gender, persona, length, category):
+    # JSON Mode ကို သုံးထားပေမယ့် တခါတလေ AI က လွဲတတ်လို့ Error handling ကောင်းကောင်းလုပ်ရမယ်
     model = genai.GenerativeModel('gemini-2.0-flash', generation_config={"response_mime_type": "application/json"})
     
-    # Construct Audience Profile
-    audience_profile = f"{gender} audience, aged {age}"
-    if persona:
-        audience_profile += f", who are specifically {persona}"
+    audience_profile = f"{gender}, aged {age}"
+    if persona: audience_profile += f", specifically {persona}"
 
-    # Length Logic
     length_instruction = "standard length (100-150 words)"
     if length == "Short": length_instruction = "very short (under 50 words)"
     elif length == "Long": length_instruction = "long-form (over 200 words)"
 
-    # Category Logic
     category_instruction = "General social media post"
-    if category == "Brand Awareness":
-        category_instruction = "Focus on storytelling, brand identity. No hard selling."
-    elif category == "Engagement":
-        category_instruction = "Focus on interaction. Ask questions, polls, encourage tagging."
-    elif category == "Educational":
-        category_instruction = "Focus on value. Teach something new, share tips, or how-to guides."
-    elif category == "Copywriting":
-        category_instruction = "Focus on sales. Use persuasion (PAS/AIDA). Strong Call to Action."
+    if category == "Brand Awareness": category_instruction = "Focus on storytelling, brand identity."
+    elif category == "Engagement": category_instruction = "Focus on interaction, questions, polls."
+    elif category == "Educational": category_instruction = "Focus on teaching, tips, how-to guides."
+    elif category == "Copywriting": category_instruction = "Focus on sales, persuasion, strong CTA."
 
     prompt = f"""
-    Act as a Senior Social Media Manager.
+    Act as a Social Media Manager.
     Create a post for {platform}.
     
-    Target Audience Profile: {audience_profile}
-    Topic: {topic}
-    Content Goal: {category} ({category_instruction})
-    Tone: {tone}
-    Length: {length_instruction}
+    Details:
+    - Topic: {topic}
+    - Audience: {audience_profile}
+    - Goal: {category} ({category_instruction})
+    - Tone: {tone}
+    - Length: {length_instruction}
 
-    Instructions:
-    1. Adapt the language style to fit the age group and gender (e.g., use slang for youth, formal for professionals).
-    2. Write in Burmese (Myanmar) mixed with English naturally.
-    3. Use Markdown formatting.
-
-    Output JSON:
-    {{
-        "post_content": "The caption content...",
-        "image_prompt": "Detailed image description in English..."
-    }}
+    Output strictly in JSON format with keys: "post_content" and "image_prompt".
     """
     
     try:
         response = model.generate_content(prompt)
-        return json.loads(response.text)
+        
+        if not response.text:
+            return {"post_content": "Error: AI returned empty response (Safety Block). Try a different topic.", "image_prompt": ""}
+
+        # JSON Parsing
+        try:
+            data = json.loads(response.text)
+        except json.JSONDecodeError:
+            # JSON မဟုတ်ဘဲ စာသားအတိုင်း ထွက်လာခဲ့ရင်
+            return {"post_content": response.text, "image_prompt": "A generic social media image"}
+
+        # Safe Get (Key မရှိရင် Error မတက်အောင် ကာကွယ်ခြင်း)
+        content = data.get("post_content") or data.get("caption") or data.get("content") or str(data)
+        img_prompt = data.get("image_prompt") or data.get("image_description") or "Social media background"
+
+        return {"post_content": content, "image_prompt": img_prompt}
+
     except Exception as e:
-        return {"post_content": f"Error: {str(e)}", "image_prompt": ""}
+        return {"post_content": f"System Error: {str(e)}", "image_prompt": ""}
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -84,14 +85,9 @@ def generate():
     if not session.get('logged_in'): return jsonify({'result': 'Unauthorized'}), 401
     data = request.json
     result = generate_content(
-        data.get('topic'), 
-        data.get('platform'), 
-        data.get('tone'),
-        data.get('age'),       # New
-        data.get('gender'),    # New
-        data.get('persona'),   # Renamed from 'audience' input
-        data.get('length'),
-        data.get('category') 
+        data.get('topic'), data.get('platform'), data.get('tone'),
+        data.get('age'), data.get('gender'), data.get('persona'),
+        data.get('length'), data.get('category') 
     )
     return jsonify(result)
 
