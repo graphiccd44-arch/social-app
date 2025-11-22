@@ -8,36 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        body { font-family: 'Inter', 'Padauk', sans-serif; }
-        .bg-main { background: #f3f4f6; }
-        
-        /* Preview Styles */
-        .preview-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #e5e7eb; }
-        
-        /* Facebook */
-        .fb-header { padding: 12px; display: flex; align-items: center; }
-        .fb-content { padding: 0 12px 12px 12px; font-size: 15px; line-height: 1.5; white-space: pre-wrap; }
-        
-        /* Instagram */
-        .ig-header { padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
-        .ig-image-placeholder { background: #f3f4f6; height: 300px; display: flex; align-items: center; justify-content: center; color: #9ca3af; }
-        .ig-actions { padding: 10px; display: flex; gap: 16px; font-size: 20px; }
-        .ig-content { padding: 0 12px 12px 12px; font-size: 14px; }
-
-        /* LinkedIn */
-        .li-header { padding: 12px; display: flex; align-items: start; }
-        .li-content { padding: 0 12px 12px 12px; font-size: 14px; line-height: 1.6; }
-        
-        /* TikTok */
-        .tt-container { background: #000; color: white; border-radius: 20px; padding: 20px; position: relative; min-height: 400px; }
-        .tt-sidebar { position: absolute; right: 10px; bottom: 60px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
-        .tt-content { position: absolute; bottom: 20px; left: 10px; right: 60px; font-size: 14px; text-shadow: 1px 1px 2px black; }
-
+        body { font-family: 'Inter', 'Padauk', sans-serif; background: #f3f4f6; }
+        .preview-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
         .loader { width: 18px; height: 18px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-main min-h-screen p-4 flex justify-center">
+<body class="min-h-screen p-4 flex justify-center">
 
     {% if show_login %}
     <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md self-center">
@@ -51,238 +28,111 @@
     {% else %}
     
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-7xl">
-        
         <div class="lg:col-span-5 bg-white p-6 rounded-xl shadow-sm h-fit">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="text-xl font-bold text-blue-600 flex items-center gap-2">
-                    <i class="fas fa-magic"></i> AI Content Suite
-                </h1>
-                <a href="/logout" class="text-gray-400 hover:text-red-500 text-sm"><i class="fas fa-power-off"></i></a>
+                <h1 class="text-xl font-bold text-blue-600"><i class="fas fa-magic"></i> AI Suite</h1>
+                <a href="/logout" class="text-gray-400 hover:text-red-500"><i class="fas fa-power-off"></i></a>
             </div>
-
             <div class="space-y-4">
-                <input type="text" id="topic" placeholder="Topic: e.g. 50% Off Summer Sale" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-blue-500 transition font-medium">
-
+                <input type="text" id="topic" placeholder="Topic..." class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-blue-500">
                 <div class="grid grid-cols-2 gap-2">
-                    <select id="ai_model" class="p-2 border rounded-lg text-sm bg-blue-50 font-bold text-blue-700">
-                        <option>Gemini 3.0 Pro</option>
-                        <option selected>Gemini 2.5 Flash</option>
-                        <option>DeepSeek</option>
-                        <option>ChatGPT</option>
-                    </select>
-                    <select id="language" class="p-2 border rounded-lg text-sm bg-blue-50 font-bold text-blue-700">
-                        <option>Myanglish</option>
-                        <option>Pure Burmese</option>
-                        <option>English Only</option>
-                    </select>
+                    <select id="ai_model" class="p-2 border rounded-lg text-sm bg-blue-50 font-bold text-blue-700"><option>Gemini 2.5 Flash</option><option>Gemini 3.0 Pro</option><option>DeepSeek</option><option>ChatGPT</option></select>
+                    <select id="language" class="p-2 border rounded-lg text-sm bg-blue-50 font-bold text-blue-700"><option>Myanglish</option><option>Pure Burmese</option><option>English Only</option></select>
                 </div>
-
-                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <div class="flex justify-between mb-2"><span class="text-xs font-bold text-gray-500 uppercase">Target Audience</span></div>
+                <div class="bg-gray-50 p-3 rounded-lg border">
+                    <div class="flex justify-between mb-2"><span class="text-xs font-bold text-gray-500 uppercase">Target</span></div>
                     <div class="grid grid-cols-2 gap-2 mb-2">
                         <select id="age" class="p-2 border rounded text-sm bg-white"><option>18-24</option><option>25-34</option><option>35-44</option><option>Any</option></select>
                         <select id="gender" class="p-2 border rounded text-sm bg-white"><option>All</option><option>Female</option><option>Male</option></select>
                     </div>
-                    <input type="text" id="persona" placeholder="e.g. Gamers, Foodies" class="w-full p-2 border rounded text-sm">
+                    <input type="text" id="persona" placeholder="e.g. Gamers" class="w-full p-2 border rounded text-sm">
                 </div>
-
                 <div class="grid grid-cols-2 gap-2">
-                    <select id="platform" class="p-2 border rounded text-sm bg-gray-50 font-medium" onchange="updatePreviewStyle()">
-                        <option value="Facebook">Facebook</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="LinkedIn">LinkedIn</option>
-                        <option value="TikTok">TikTok</option>
-                    </select>
-                    <select id="tone" class="p-2 border rounded text-sm bg-gray-50 font-medium"><option>Professional</option><option>Funny</option><option>Emotional</option></select>
+                    <select id="platform" class="p-2 border rounded text-sm bg-gray-50" onchange="renderPreview()"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option><option>TikTok</option></select>
+                    <select id="tone" class="p-2 border rounded text-sm bg-gray-50"><option>Professional</option><option>Funny</option><option>Emotional</option></select>
                 </div>
-
-                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-lg shadow hover:shadow-lg transition flex justify-center items-center gap-2">
-                    <span>Generate</span>
-                </button>
-
-                <div class="mt-6 pt-4 border-t">
+                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-lg shadow hover:shadow-lg flex justify-center items-center gap-2">Generate</button>
+                
+                <div class="mt-4 pt-4 border-t">
                     <h3 class="text-xs font-bold text-gray-400 uppercase mb-2">History</h3>
-                    <div id="historyList" class="space-y-2 max-h-40 overflow-y-auto text-sm text-gray-600">
-                        <p class="text-xs text-gray-400 italic">No saved posts yet.</p>
-                    </div>
-                    <button onclick="clearHistory()" class="text-xs text-red-400 mt-2 hover:underline">Clear History</button>
+                    <div id="historyList" class="space-y-2 max-h-32 overflow-y-auto text-sm text-gray-600"><p class="text-xs italic text-gray-400">Empty</p></div>
                 </div>
             </div>
         </div>
 
-        <div class="lg:col-span-7 flex flex-col">
-            <div class="bg-white p-6 rounded-xl shadow-sm min-h-[600px] flex flex-col relative">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Live Preview</h3>
-                    <button onclick="copyText()" id="copyBtn" class="hidden bg-blue-50 text-blue-600 px-3 py-1 rounded text-xs font-bold hover:bg-blue-100"><i class="far fa-copy mr-1"></i> Copy</button>
-                </div>
-
-                <div id="previewContainer" class="flex-grow">
-                    <div class="flex flex-col items-center justify-center h-64 text-gray-300">
-                        <i class="fas fa-mobile-alt text-5xl mb-2"></i>
-                        <p>Select a platform and generate content</p>
-                    </div>
-                </div>
-
-                <div id="magicButtons" class="hidden mt-4 pt-4 border-t border-gray-100">
-                    <p class="text-xs font-bold text-purple-600 mb-2">✨ Magic Refine:</p>
-                    <div class="flex flex-wrap gap-2">
-                        <button onclick="refine('Make it shorter')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100 transition">✂️ Shorten</button>
-                        <button onclick="refine('Make it longer & detailed')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100 transition">📝 Expand</button>
-                        <button onclick="refine('Add more emojis')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100 transition">😍 Emojis</button>
-                        <button onclick="refine('Fix grammar & polish')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100 transition">✅ Polish</button>
-                        <button onclick="refine('Translate to English')" class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-green-100 transition">🇺🇸 English</button>
-                    </div>
-                </div>
-
-                <textarea id="rawText" class="hidden"></textarea>
+        <div class="lg:col-span-7 bg-white p-6 rounded-xl shadow-sm min-h-[600px] flex flex-col">
+            <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Preview</h3>
+            <div id="previewContainer" class="flex-grow">
+                <div class="flex flex-col items-center justify-center h-64 text-gray-300"><i class="fas fa-mobile-alt text-5xl mb-2"></i><p>Ready to generate</p></div>
             </div>
+            <div id="magicButtons" class="hidden mt-4 pt-4 border-t flex flex-wrap gap-2">
+                <button onclick="refine('Shorten it')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">✂️ Shorten</button>
+                <button onclick="refine('Add emojis')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">😍 Emojis</button>
+                <button onclick="refine('Fix grammar')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">✅ Polish</button>
+                <button onclick="copyText()" class="ml-auto bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-100">Copy</button>
+            </div>
+            <textarea id="rawText" class="hidden"></textarea>
         </div>
     </div>
 
     <script>
-        // Load history on start
         window.onload = loadHistory;
-
-        async function generate(refineInstruction = null) {
+        async function generate(refineInstr = null) {
             const data = {
                 topic: document.getElementById('topic').value,
                 platform: document.getElementById('platform').value,
-                // Basic Data
                 tone: document.getElementById('tone').value,
                 age: document.getElementById('age').value,
                 gender: document.getElementById('gender').value,
                 persona: document.getElementById('persona').value,
                 language: document.getElementById('language').value,
                 ai_model: document.getElementById('ai_model').value,
-                // Refinement Data
-                refine_instruction: refineInstruction,
+                refine_instruction: refineInstr,
                 current_text: document.getElementById('rawText').value
             };
-
-            if(!data.topic && !refineInstruction) return alert("Please enter a topic!");
-
+            if(!data.topic && !refineInstr) return alert("Please enter a topic!");
             const btn = document.getElementById('genBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="loader"></div>';
-            btn.disabled = true;
-
+            btn.innerHTML = '<div class="loader"></div>'; btn.disabled = true;
             try {
-                const res = await fetch('/generate', {
-                    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
-                });
-                
+                const res = await fetch('/generate', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
                 const json = await res.json();
                 const content = json.post_content || "Error.";
-                
-                // Update UI
-                renderPreview(data.platform, content);
                 document.getElementById('rawText').value = content;
+                renderPreview(content);
                 document.getElementById('magicButtons').classList.remove('hidden');
-                document.getElementById('copyBtn').classList.remove('hidden');
-
-                // Save to History (only if new generation)
-                if(!refineInstruction) saveToHistory(data.topic, content, data.platform);
-
+                if(!refineInstr) saveHistory(data.topic, content);
             } catch (e) { alert("Error: " + e); } 
-            finally { btn.innerHTML = originalText; btn.disabled = false; }
+            finally { btn.innerHTML = 'Generate'; btn.disabled = false; }
         }
-
-        function refine(instruction) {
-            generate(instruction);
-        }
-
-        // --- PREVIEW LOGIC ---
-        function renderPreview(platform, text) {
-            const container = document.getElementById('previewContainer');
-            // Format: Bold and Line Breaks
-            let html = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
-
-            if (platform === 'Facebook') {
-                container.innerHTML = `
-                <div class="preview-card p-4">
-                    <div class="fb-header">
-                        <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center"><i class="fas fa-user text-gray-500"></i></div>
-                        <div class="ml-3">
-                            <div class="font-bold text-sm">Page Name</div>
-                            <div class="text-xs text-gray-500">Just now · <i class="fas fa-globe-americas"></i></div>
-                        </div>
-                    </div>
-                    <div class="fb-content">${html}</div>
-                    <div class="border-t p-2 flex justify-between text-gray-500 text-sm font-semibold">
-                        <span><i class="far fa-thumbs-up"></i> Like</span><span><i class="far fa-comment"></i> Comment</span><span><i class="fas fa-share"></i> Share</span>
-                    </div>
-                </div>`;
-            } else if (platform === 'Instagram') {
-                container.innerHTML = `
-                <div class="preview-card max-w-sm mx-auto">
-                    <div class="ig-header">
-                        <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-full bg-gray-300"></div><span class="font-bold text-sm">username</span></div>
-                        <i class="fas fa-ellipsis-h"></i>
-                    </div>
-                    <div class="ig-image-placeholder"><i class="fas fa-image text-4xl"></i></div>
-                    <div class="ig-actions"><i class="far fa-heart"></i><i class="far fa-comment"></i><i class="far fa-paper-plane"></i></div>
-                    <div class="ig-content"><span class="font-bold text-sm mr-2">username</span>${html}</div>
-                </div>`;
-            } else if (platform === 'LinkedIn') {
-                container.innerHTML = `
-                <div class="preview-card p-4 border border-gray-200">
-                    <div class="li-header">
-                        <div class="w-12 h-12 rounded bg-gray-300"></div>
-                        <div class="ml-3">
-                            <div class="font-bold text-sm">User Name</div>
-                            <div class="text-xs text-gray-500">Marketing Expert</div>
-                            <div class="text-xs text-gray-500">1m • <i class="fas fa-globe"></i></div>
-                        </div>
-                    </div>
-                    <div class="li-content mt-2 text-sm text-gray-800">${html}</div>
-                    <div class="border-t mt-2 pt-2 flex gap-4 text-gray-500 text-sm font-bold">
-                        <span><i class="far fa-thumbs-up"></i> Like</span><span><i class="far fa-comment-dots"></i> Comment</span>
-                    </div>
-                </div>`;
-            } else if (platform === 'TikTok') {
-                container.innerHTML = `
-                <div class="max-w-xs mx-auto tt-container">
-                    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-gray-500 text-center">
-                        <i class="fas fa-play text-4xl mb-2"></i><br>Video Preview
-                    </div>
-                    <div class="tt-sidebar">
-                        <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-black"><i class="fas fa-plus"></i></div>
-                        <i class="fas fa-heart text-2xl"></i><span class="text-xs">1.2M</span>
-                        <i class="fas fa-comment-dots text-2xl"></i><span class="text-xs">50K</span>
-                        <i class="fas fa-share text-2xl"></i><span class="text-xs">Share</span>
-                    </div>
-                    <div class="tt-content">
-                        <div class="font-bold mb-1">@username</div>
-                        ${html}
-                    </div>
-                </div>`;
-            }
-        }
-
-        function updatePreviewStyle() {
+        function refine(instr) { generate(instr); }
+        function renderPreview(text = null) {
+            const content = text || document.getElementById('rawText').value;
             const platform = document.getElementById('platform').value;
-            const currentText = document.getElementById('rawText').value;
-            if(currentText) renderPreview(platform, currentText);
+            const html = content.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+            const container = document.getElementById('previewContainer');
+            if(platform === 'Facebook') container.innerHTML = `<div class="preview-card p-4"><div class="flex items-center mb-3"><div class="w-10 h-10 bg-gray-300 rounded-full"></div><div class="ml-3"><div class="font-bold text-sm">Page Name</div><div class="text-xs text-gray-500">Just now</div></div></div><div class="text-sm text-gray-900">${html}</div></div>`;
+            else if(platform === 'Instagram') container.innerHTML = `<div class="preview-card max-w-sm mx-auto"><div class="p-2 flex items-center gap-2 border-b"><div class="w-8 h-8 bg-gray-300 rounded-full"></div><span class="font-bold text-sm">username</span></div><div class="h-64 bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image text-3xl"></i></div><div class="p-3 text-sm"><span class="font-bold mr-2">username</span>${html}</div></div>`;
+            else container.innerHTML = `<div class="preview-card p-4 text-sm">${html}</div>`;
         }
-
-        // --- HISTORY LOGIC ---
-        function saveToHistory(topic, content, platform) {
-            let history = JSON.parse(localStorage.getItem('aiHistory')) || [];
-            history.unshift({ topic, content, platform, date: new Date().toLocaleTimeString() });
-            if(history.length > 10) history.pop(); // Keep last 10
-            localStorage.setItem('aiHistory', JSON.stringify(history));
+        function saveHistory(t, c) {
+            let h = JSON.parse(localStorage.getItem('aiH')) || [];
+            h.unshift({t, c, d: new Date().toLocaleTimeString()});
+            if(h.length>10) h.pop();
+            localStorage.setItem('aiH', JSON.stringify(h));
             loadHistory();
         }
-
         function loadHistory() {
-            const history = JSON.parse(localStorage.getItem('aiHistory')) || [];
-            const list = document.getElementById('historyList');
-            if(history.length === 0) {
-                list.innerHTML = '<p class="text-xs text-gray-400 italic">No saved posts yet.</p>';
-                return;
-            }
-            list.innerHTML = history.map((item, index) => `
-                <div onclick="restorePost(${index})" class="cursor-pointer p-2 hover:bg-blue-50 rounded border border-gray-100">
-                    <div class="font-bold text-xs text-blue-600 truncate">${item.topic}</div>
-                    <div class="text-[10px]
+            const h = JSON.parse(localStorage.getItem('aiH')) || [];
+            document.getElementById('historyList').innerHTML = h.length ? h.map((i,x) => `<div onclick="restore(${x})" class="cursor-pointer p-2 hover:bg-blue-50 rounded border border-gray-100 truncate text-xs font-bold text-blue-600">${i.t}</div>`).join('') : '<p class="text-xs italic text-gray-400">Empty</p>';
+        }
+        function restore(x) {
+            const item = JSON.parse(localStorage.getItem('aiH'))[x];
+            document.getElementById('rawText').value = item.c;
+            renderPreview(item.c);
+            document.getElementById('magicButtons').classList.remove('hidden');
+        }
+        function copyText() { navigator.clipboard.writeText(document.getElementById('rawText').value); alert("Copied!"); }
+    </script>
+    {% endif %}
+</body>
+</html>
