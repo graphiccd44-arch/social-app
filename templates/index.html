@@ -3,160 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Content Master</title>
+    <title>AI Content Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&display=swap');
         body { font-family: 'Padauk', sans-serif; }
-        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .loader {
-            border: 3px solid #f3f3f3; border-radius: 50%; border-top: 3px solid #3498db;
-            width: 20px; height: 20px; -webkit-animation: spin 2s linear infinite; animation: spin 1s linear infinite;
-        }
+        .gradient-bg { background: linear-gradient(135deg, #A18CD1 0%, #FBC2EB 100%); }
+        .loader { width: 20px; height: 20px; border: 3px solid #fff; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .prose h1, .prose h2 { font-weight: bold; margin-bottom: 0.5rem; }
+        .prose p { margin-bottom: 0.8rem; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.8rem; }
+        .prose strong { color: #9333ea; }
     </style>
 </head>
 <body class="gradient-bg min-h-screen flex items-center justify-center p-4">
 
     {% if show_login %}
-    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">🔒 Login ဝင်ပါ</h2>
-        {% if error %}
-            <p class="text-red-500 text-center mb-4 text-sm">{{ error }}</p>
-        {% endif %}
+    <div class="bg-white/90 backdrop-blur p-8 rounded-3xl shadow-2xl w-full max-w-md">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">🔒 Login</h2>
+        {% if error %}<p class="text-red-500 text-center mb-4 text-sm">{{ error }}</p>{% endif %}
         <form method="POST">
-            <input type="password" name="password" placeholder="စကားဝှက် ရိုက်ထည့်ပါ..." required
-                   class="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4">
-            <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition">
-                ဝင်ရောက်မည်
-            </button>
+            <input type="password" name="password" placeholder="Password..." required class="w-full p-4 border border-gray-200 rounded-xl mb-4 outline-none focus:ring-2 focus:ring-purple-400">
+            <button type="submit" class="w-full bg-purple-600 text-white font-bold py-3 rounded-xl hover:bg-purple-700 transition">ENTER</button>
         </form>
     </div>
-
     {% else %}
-    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all relative">
+    
+    <div class="bg-white/95 backdrop-blur p-6 md:p-8 rounded-3xl shadow-2xl w-full max-w-3xl relative">
+        <a href="/logout" class="absolute top-6 right-6 text-gray-400 hover:text-red-500"><i class="fas fa-sign-out-alt"></i></a>
         
-        <a href="/logout" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 text-sm">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-
         <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">🚀 AI Content Master</h1>
+            <h1 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">AI Content Generator</h1>
+            <p class="text-gray-500 text-sm mt-1">Smart Targeting System</p>
         </div>
 
-        <div class="space-y-4">
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-1">ခေါင်းစဉ် (Topic)</label>
-                <input type="text" id="topic" placeholder="ဥပမာ - ရာသီစာ လျှော့ဈေး..." 
-                       class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 bg-gray-50">
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+                
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Target Audience</label>
-                    <input type="text" id="audience" placeholder="ဥပမာ - အိမ်ရှင်မများ" 
-                           class="w-full p-3 border border-gray-200 rounded-xl bg-gray-50">
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Platform</label>
-                    <select id="platform" class="w-full p-3 border border-gray-200 rounded-xl bg-gray-50">
-                        <option value="Facebook">Facebook</option>
-                        <option value="Instagram">Instagram</option>
-                        <option value="TikTok Script">TikTok Script</option>
-                        <option value="LinkedIn">LinkedIn</option>
+                    <label class="text-xs font-bold text-purple-600 uppercase tracking-wider">🎯 Content Category</label>
+                    <select id="category" class="w-full p-3 border-2 border-purple-100 rounded-xl bg-white outline-none focus:border-purple-500 transition font-bold text-gray-700">
+                        <option value="Brand Awareness">Brand Awareness</option>
+                        <option value="Engagement">Engagement</option>
+                        <option value="Educational">Educational</option>
+                        <option value="Copywriting">Copywriting (Sales)</option>
                     </select>
                 </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">Mood (Tone)</label>
-                    <select id="tone" class="w-full p-3 border border-gray-200 rounded-xl bg-gray-50">
-                        <option value="Professional">Professional (လေးနက်)</option>
-                        <option value="Funny">Funny (ဟာသ)</option>
-                        <option value="Emotional">Emotional (ခံစားမှု)</option>
-                        <option value="Sales">Sales (ရောင်းအားမြှင့်)</option>
-                    </select>
+                <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
+                    <label class="text-xs font-bold text-purple-600 uppercase block mb-2">👥 Target Audience</label>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <select id="age" class="p-2 border rounded-lg text-sm bg-white">
+                            <option value="Any Age">Any Age</option>
+                            <option value="13-17 (Gen Z)">13-17 (Teens)</option>
+                            <option value="18-24 (Young Adults)">18-24 (Youth)</option>
+                            <option value="25-34 (Millennials)">25-34 (Adults)</option>
+                            <option value="35-44 (Professionals)">35-44 (Mature)</option>
+                            <option value="45+ (Seniors)">45+ (Seniors)</option>
+                        </select>
+                        <select id="gender" class="p-2 border rounded-lg text-sm bg-white">
+                            <option value="All Genders">All Genders</option>
+                            <option value="Male">Male (ကျား)</option>
+                            <option value="Female">Female (မ)</option>
+                        </select>
+                    </div>
+                    <input type="text" id="persona" placeholder="Specific? e.g. Gamers, Moms" class="w-full p-2 border rounded-lg text-sm outline-none focus:ring-1 focus:ring-purple-400">
                 </div>
+
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-1">စာသား အတို/အရှည်</label>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Topic</label>
+                    <input type="text" id="topic" placeholder="e.g. New Product Launch" class="w-full p-3 border rounded-xl bg-gray-50 outline-none focus:ring-2 focus:ring-purple-400 transition">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <select id="platform" class="p-3 border rounded-xl bg-gray-50 text-sm"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option><option>TikTok</option></select>
+                    <select id="tone" class="p-3 border rounded-xl bg-gray-50 text-sm"><option>Professional</option><option>Funny</option><option>Emotional</option><option>Excited</option></select>
+                </div>
+
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Length</label>
                     <div class="flex bg-gray-100 p-1 rounded-xl">
-                        <button onclick="setLength('Short')" class="len-btn flex-1 p-2 rounded-lg text-xs font-bold text-gray-600 hover:bg-white transition">Short</button>
-                        <button onclick="setLength('Medium')" class="len-btn flex-1 p-2 rounded-lg text-xs font-bold bg-white shadow text-purple-600 transition">Medium</button>
-                        <button onclick="setLength('Long')" class="len-btn flex-1 p-2 rounded-lg text-xs font-bold text-gray-600 hover:bg-white transition">Long</button>
+                        <button onclick="setLen('Short')" class="l-btn flex-1 py-2 rounded-lg text-xs font-bold text-gray-500 hover:bg-white">Short</button>
+                        <button onclick="setLen('Medium')" class="l-btn flex-1 py-2 rounded-lg text-xs font-bold bg-white shadow text-purple-600">Medium</button>
+                        <button onclick="setLen('Long')" class="l-btn flex-1 py-2 rounded-lg text-xs font-bold text-gray-500 hover:bg-white">Long</button>
                     </div>
                     <input type="hidden" id="length" value="Medium">
                 </div>
+
+                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex justify-center items-center gap-2">
+                    <span>✨ Generate Post</span>
+                </button>
             </div>
 
-            <button onclick="generateContent()" id="genBtn"
-                    class="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 rounded-xl hover:opacity-90 transition shadow-lg flex justify-center items-center gap-2 mt-4">
-                <span>✨ ဖန်တီးမည်</span>
-            </button>
-
-            <div id="resultArea" class="hidden mt-6 animate-fade-in">
-                <div class="flex justify-between items-center mb-2">
-                    <h3 class="text-lg font-bold text-gray-800">ရလဒ်:</h3>
-                    <button onclick="copyToClipboard()" class="text-sm text-purple-600 hover:text-purple-800"><i class="far fa-copy"></i> Copy</button>
+            <div id="outputArea" class="hidden md:block border-l pl-0 md:pl-6 border-gray-200">
+                <div class="mb-4">
+                    <span class="text-xs font-bold text-gray-400 uppercase">AI Image</span>
+                    <div id="imgContainer" class="w-full h-48 bg-gray-200 rounded-xl overflow-hidden mt-2 relative">
+                        <div class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">Image loading...</div>
+                        <img id="aiImage" class="w-full h-full object-cover hidden" alt="AI Art">
+                    </div>
                 </div>
-                <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 whitespace-pre-wrap leading-relaxed text-gray-700 text-sm" id="outputConfig"></div>
+                <div>
+                    <div class="flex justify-between items-end mb-2">
+                        <span class="text-xs font-bold text-gray-400 uppercase">Caption</span>
+                        <button onclick="copyText()" class="text-purple-600 text-xs font-bold hover:underline">Copy Text</button>
+                    </div>
+                    <div id="contentText" class="prose text-sm text-gray-700 h-64 overflow-y-auto pr-2"></div>
+                    <input type="hidden" id="rawText">
+                </div>
             </div>
         </div>
+        
+        <div id="mobileResult" class="md:hidden mt-6 hidden">
+            <hr class="my-4">
+            <h3 class="font-bold mb-2 text-purple-600">Generated Result:</h3>
+            <img id="mobileImage" class="w-full rounded-xl mb-4 hidden">
+            <div id="mobileText" class="prose text-sm text-gray-700"></div>
+        </div>
+
     </div>
 
     <script>
-        function setLength(val) {
+        function setLen(val) {
             document.getElementById('length').value = val;
-            document.querySelectorAll('.len-btn').forEach(b => {
+            document.querySelectorAll('.l-btn').forEach(b => {
                 b.classList.remove('bg-white', 'shadow', 'text-purple-600');
-                b.classList.add('text-gray-600');
-                if(b.innerText === val) {
-                    b.classList.add('bg-white', 'shadow', 'text-purple-600');
-                    b.classList.remove('text-gray-600');
-                }
+                b.classList.add('text-gray-500');
+                if(b.innerText === val) { b.classList.add('bg-white', 'shadow', 'text-purple-600'); b.classList.remove('text-gray-500'); }
             });
         }
 
-        async function generateContent() {
-            const topic = document.getElementById('topic').value;
-            const platform = document.getElementById('platform').value;
-            const audience = document.getElementById('audience').value || "General Public";
-            const tone = document.getElementById('tone').value;
-            const length = document.getElementById('length').value;
+        async function generate() {
+            const data = {
+                topic: document.getElementById('topic').value,
+                platform: document.getElementById('platform').value,
+                category: document.getElementById('category').value,
+                tone: document.getElementById('tone').value,
+                length: document.getElementById('length').value,
+                // New Fields
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                persona: document.getElementById('persona').value
+            };
+
+            if(!data.topic) return alert("Topic ထည့်ပါဦး!");
+
             const btn = document.getElementById('genBtn');
-            const resultArea = document.getElementById('resultArea');
-            const output = document.getElementById('outputConfig');
-
-            if (!topic) { alert("ခေါင်းစဉ် ထည့်ပေးပါ!"); return; }
-
-            btn.innerHTML = '<div class="loader"></div> <span>စဉ်းစားနေပါသည်...</span>';
+            btn.innerHTML = '<div class="loader"></div>';
             btn.disabled = true;
-            resultArea.classList.add('hidden');
 
             try {
-                const response = await fetch('/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic, platform, tone, audience, length })
+                const res = await fetch('/generate', {
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
                 });
+                if(res.status === 401) return location.reload();
                 
-                if (response.status === 401) { location.reload(); return; } // Session Expired
+                const json = await res.json();
+                
+                // Text
+                const htmlContent = marked.parse(json.post_content);
+                document.getElementById('contentText').innerHTML = htmlContent;
+                document.getElementById('mobileText').innerHTML = htmlContent;
+                document.getElementById('rawText').value = json.post_content;
 
-                const data = await response.json();
-                output.innerText = data.result;
-                resultArea.classList.remove('hidden');
-            } catch (error) {
-                alert("Error: " + error);
+                // Image
+                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(json.image_prompt)}?nologo=true&width=800&height=600&seed=${Math.random()}`;
+                const img = document.getElementById('aiImage');
+                img.src = imgUrl;
+                img.onload = () => img.classList.remove('hidden');
+                const mImg = document.getElementById('mobileImage');
+                mImg.src = imgUrl;
+                mImg.classList.remove('hidden');
+
+                document.getElementById('outputArea').classList.remove('hidden');
+                document.getElementById('mobileResult').classList.remove('hidden');
+
+            } catch (e) {
+                alert("Error: " + e);
             } finally {
-                btn.innerHTML = '<span>✨ ဖန်တီးမည်</span>';
+                btn.innerHTML = '<span>✨ Generate Post</span>';
                 btn.disabled = false;
             }
         }
 
-        function copyToClipboard() {
-            navigator.clipboard.writeText(document.getElementById('outputConfig').innerText);
-            alert("Copied!");
+        function copyText() {
+            navigator.clipboard.writeText(document.getElementById('rawText').value);
+            alert("စာသား ကူးယူပြီးပါပြီ!");
         }
     </script>
     {% endif %}
