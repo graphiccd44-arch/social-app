@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Class (Unified Auth)</title>
+    <title>My Class (Stable Auth)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #6366f1; --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1f2937; --border: #e5e7eb; }
@@ -11,12 +11,10 @@
         
         /* AUTH UI */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #eef2ff; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 360px; text-align: center; transition: 0.3s; }
-        .login-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; transition: 0.3s; }
-        .login-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+        .login-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 360px; text-align: center; }
+        .login-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
         .login-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .login-btn:hover { opacity: 0.9; }
-        .login-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .login-btn:disabled { background: #94a3b8; cursor: not-allowed; }
         .toggle-link { margin-top: 15px; font-size: 13px; color: var(--primary); cursor: pointer; text-decoration: underline; display: block; }
         .hidden { display: none; }
 
@@ -61,11 +59,11 @@
         <div class="login-card" id="login-form">
             <h2 style="color:var(--primary); margin-bottom:10px;">🚀 Login</h2>
             
-            <input type="text" id="loginInput" class="login-input" placeholder="Email or Phone (+959...)" oninput="detectInputType(this, 'loginPass')">
+            <input type="text" id="loginInput" class="login-input" placeholder="Email or Phone (+66...)" oninput="detectInputType(this, 'loginPass')">
             
             <input type="password" id="loginPass" class="login-input hidden" placeholder="Password">
             
-            <div id="recaptcha-container-login" class="hidden" style="margin-bottom:10px; justify-content:center;"></div>
+            <div id="recaptcha-container-login"></div>
             
             <button class="login-btn" id="loginBtn" onclick="handleLogin()">Continue</button>
             <span class="toggle-link" onclick="toggleAuth('register')">Create New Account</span>
@@ -75,11 +73,11 @@
             <h2 style="color:var(--primary); margin-bottom:10px;">🆕 Sign Up</h2>
             
             <input type="text" id="regName" class="login-input" placeholder="Full Name">
-            <input type="text" id="regInput" class="login-input" placeholder="Email or Phone (+959...)" oninput="detectInputType(this, 'regPass')">
+            <input type="text" id="regInput" class="login-input" placeholder="Email or Phone (+66...)" oninput="detectInputType(this, 'regPass')">
             
             <input type="password" id="regPass" class="login-input hidden" placeholder="Password (Min 6 chars)">
             
-            <div id="recaptcha-container-reg" class="hidden" style="margin-bottom:10px; justify-content:center;"></div>
+            <div id="recaptcha-container-reg"></div>
 
             <button class="login-btn" id="regBtn" onclick="handleRegister()">Sign Up</button>
             <span class="toggle-link" onclick="toggleAuth('login')">Back to Login</span>
@@ -87,10 +85,10 @@
 
         <div class="login-card" id="otp-form" style="display:none;">
             <h2 style="color:var(--primary);">🔒 Verify OTP</h2>
-            <p style="color:gray; font-size:13px;">Enter the code sent to your phone.</p>
+            <p style="color:gray; font-size:13px;">Enter code sent to your phone.</p>
             <input type="text" id="otpCode" class="login-input" placeholder="123456" style="text-align:center; letter-spacing:5px;">
             <button class="login-btn" onclick="verifyOTP()">Verify & Login</button>
-            <p onclick="location.reload()" style="font-size:12px; color:red; cursor:pointer; margin-top:15px;">Cancel</p>
+            <p onclick="location.reload()" style="font-size:12px; color:red; cursor:pointer; margin-top:15px;">Cancel / Try Again</p>
         </div>
 
     </div>
@@ -109,7 +107,7 @@
 
         <div class="main-layout">
             <aside class="sidebar">
-                <div class="menu-item active" id="nav-feed" onclick="switchTab('feed')">🏠 Home</div>
+                <div class="menu-item active" id="nav-feed" onclick="switchTab('feed')">🏠 Feed</div>
                 <div class="menu-item" id="nav-gen" onclick="switchTab('generator')">✨ AI Generator</div>
                 <div class="menu-item" id="nav-courses" onclick="switchTab('courses')">🎓 My Courses</div>
                 <div class="menu-item" id="nav-settings" onclick="switchTab('settings')">⚙️ Settings</div>
@@ -143,7 +141,7 @@
                             <div><label>Length</label><select id="length"><option>Medium</option><option>Short</option></select></div>
                         </div>
                         <button class="btn-gen" id="genBtn" onclick="generateContent()">✨ Generate</button>
-                        <div id="output" class="result-box" style="background:#f8f9fa; padding:15px; margin-top:15px; border:1px solid #ddd; min-height:80px; white-space:pre-wrap;"></div>
+                        <div id="output" class="result-box" style="background:#f8f9fa; padding:15px; margin-top:15px; border:1px solid #ddd; min-height:80px; white-space: pre-wrap;"></div>
                         <button class="btn-gen" style="background:#10b981; display:none;" id="useBtn" onclick="sendToFeed()">📝 Send to Feed</button>
                     </div>
                 </div>
@@ -212,26 +210,22 @@
         // 🔐 CONFIG
         const ENCODED_KEY = "QUl6YVN5Q1Z6YUEyQlJGYndfbmcxVmpRWldYNU55TlAtZlItYURR"; 
         const MODEL_NAME = "gemini-2.5-flash";
-        const ADMIN_PHONE = "+66810733351"; // Admin Phone
+        const ADMIN_PHONE = "+66810733351"; 
 
         let confirmationResult = null;
         let isAdmin = false;
-        let currentCourseId = null;
-        let isDefaultCourse = false;
         let tempRegName = "";
 
-        // --- UNIFIED AUTH LOGIC ---
+        // --- UNIFIED AUTH LOGIC (Smart Detect) ---
         window.toggleAuth = (v) => {
             document.getElementById('login-form').style.display = v==='login'?'block':'none';
             document.getElementById('register-form').style.display = v==='register'?'block':'none';
             document.getElementById('otp-form').style.display = 'none';
         }
 
-        // Detect if Email or Phone
         window.detectInputType = (input, passId) => {
             const val = input.value;
             const passField = document.getElementById(passId);
-            // If has @ it is Email, else if has numbers it is Phone
             if (val.includes('@')) {
                 passField.style.display = 'block';
             } else {
@@ -239,35 +233,34 @@
             }
         }
 
-        // SETUP RECAPTCHA
+        // Setup Recaptcha when SEND SMS is clicked (Lazy Load)
         const setupRecaptcha = (containerId) => {
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
-                    'size': 'normal',
-                    'callback': () => { console.log("Recaptcha Verified"); }
-                });
-                window.recaptchaVerifier.render();
+            // Clear existing verifier if any
+            if(window.recaptchaVerifier) {
+                window.recaptchaVerifier.clear();
+                window.recaptchaVerifier = null;
             }
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+                'size': 'normal',
+                'callback': () => console.log("Captcha Solved")
+            });
         }
 
         // LOGIN HANDLER
         window.handleLogin = async () => {
-            const input = document.getElementById('loginInput').value;
+            const input = document.getElementById('loginInput').value.trim();
             const pass = document.getElementById('loginPass').value;
             const btn = document.getElementById('loginBtn');
 
             if(input.includes('@')) {
-                // EMAIL LOGIN
                 if(!pass) { alert("Enter Password"); return; }
                 try { await signInWithEmailAndPassword(auth, input, pass); }
                 catch(e) { alert("Login Error: " + e.message); }
             } else {
-                // PHONE LOGIN
                 if(input.length < 8) { alert("Invalid Phone"); return; }
                 btn.disabled = true; btn.innerText = "Sending SMS...";
                 
-                // Show Recaptcha Container
-                document.getElementById('recaptcha-container-login').style.display = 'flex';
+                // Use login container for captcha
                 setupRecaptcha('recaptcha-container-login');
 
                 try {
@@ -278,15 +271,13 @@
                     console.error(e);
                     alert("SMS Error: " + e.message);
                     btn.disabled = false; btn.innerText = "Continue";
-                    window.recaptchaVerifier.clear();
-                    window.recaptchaVerifier = null; // Reset
                 }
             }
         }
 
         // REGISTER HANDLER
         window.handleRegister = async () => {
-            const input = document.getElementById('regInput').value;
+            const input = document.getElementById('regInput').value.trim();
             const pass = document.getElementById('regPass').value;
             const name = document.getElementById('regName').value;
             const btn = document.getElementById('regBtn');
@@ -295,8 +286,7 @@
             tempRegName = name;
 
             if(input.includes('@')) {
-                // EMAIL REGISTER
-                if(pass.length < 6) { alert("Password short"); return; }
+                if(pass.length < 6) { alert("Password too short"); return; }
                 try {
                     const uc = await createUserWithEmailAndPassword(auth, input, pass);
                     await updateProfile(uc.user, { displayName: name });
@@ -304,11 +294,9 @@
                     alert("Account Created!");
                 } catch(e) { alert("Error: " + e.message); }
             } else {
-                // PHONE REGISTER
                 if(input.length < 8) { alert("Invalid Phone"); return; }
                 btn.disabled = true; btn.innerText = "Sending SMS...";
                 
-                document.getElementById('recaptcha-container-reg').style.display = 'flex';
                 setupRecaptcha('recaptcha-container-reg');
 
                 try {
@@ -319,20 +307,16 @@
                     console.error(e);
                     alert("SMS Error: " + e.message);
                     btn.disabled = false; btn.innerText = "Sign Up";
-                    window.recaptchaVerifier.clear();
-                    window.recaptchaVerifier = null;
                 }
             }
         }
 
-        // VERIFY OTP
         window.verifyOTP = async () => {
             const code = document.getElementById('otpCode').value;
             if(!code) return;
             try {
                 const result = await confirmationResult.confirm(code);
                 const user = result.user;
-                // If new user (check via DB), save name
                 const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
                 const snap = await getDocs(q);
                 if(snap.empty) {
@@ -344,18 +328,16 @@
 
         window.logoutUser = () => signOut(auth);
 
-        // --- AUTH LISTENER ---
+        // --- STATE ---
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
-                
                 const identifier = user.phoneNumber || user.email;
                 document.getElementById('navUserName').innerText = user.displayName || "User";
                 document.getElementById('settingContact').value = identifier;
                 document.getElementById('settingUid').value = user.uid;
 
-                // Admin Check
                 isAdmin = (user.phoneNumber === ADMIN_PHONE || user.email === "admin@myclass.com");
                 if(isAdmin) {
                     document.getElementById('adminBadge').style.display = 'block';
@@ -382,11 +364,10 @@
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
                 document.getElementById('app-content').style.display = 'none';
-                window.recaptchaVerifier = null; // Reset ReCaptcha
             }
         });
 
-        // --- GENERATOR & APP LOGIC ---
+        // (Existing Generator & Courses Logic remains same as V23)
         window.triggerFileInput = () => document.getElementById('profileInput').click();
         window.updateProfilePic = (input) => {
             const file = input.files[0]; if(!file) return;
@@ -441,7 +422,6 @@
 
         const defaultCourses = { 'webdev': { title: "Web Development", videos: [ {title:"HTML", id:"ok-plXXHlWw"}, {title:"CSS", id:"1Rs2ND1ryYc"}, {title:"JS", id:"hdI2bqOjy3c"} ] }, 'marketing': { title: "Digital Marketing", videos: [ {title:"Marketing 101", id:"bixR-KIJKYM"}, {title:"Strategy", id:"U5i80B0O_h4"} ] } };
         window.openDefaultCourse = (key) => {
-            isDefaultCourse = true;
             document.getElementById('deleteCourseBtn').style.display = 'none';
             document.getElementById('adminVideoBox').style.display = 'none';
             openPlayer(defaultCourses[key].title, defaultCourses[key].videos);
@@ -458,7 +438,7 @@
             });
         });
         window.openAdminCourse = (id, data) => {
-            isDefaultCourse = false; currentCourseId = id;
+            currentCourseId = id;
             if(isAdmin) { document.getElementById('deleteCourseBtn').style.display = 'block'; document.getElementById('adminVideoBox').style.display = 'block'; }
             else { document.getElementById('deleteCourseBtn').style.display = 'none'; document.getElementById('adminVideoBox').style.display = 'none'; }
             openPlayer(data.title, data.videos || []);
@@ -484,7 +464,7 @@
             alert("Added!");
         }
         window.deleteCurrentCourse = async () => { 
-            if(isDefaultCourse || !isAdmin) return; if(confirm("Delete?")) { await deleteDoc(doc(db, "courses", currentCourseId)); window.backToCourses(); } 
+            if(!isAdmin) return; if(confirm("Delete?")) { await deleteDoc(doc(db, "courses", currentCourseId)); window.backToCourses(); } 
         }
         window.backToCourses = () => { document.getElementById('course-player-view').style.display='none'; document.getElementById('course-list-view').style.display='block'; document.getElementById('mainVideo').src=""; }
         window.switchTab = (t) => {
