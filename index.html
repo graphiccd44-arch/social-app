@@ -3,259 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Class (Dashboard UI)</title>
+    <title>My Class (Unified Auth)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --primary-hover: #4f46e5; --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1f2937; --border: #e5e7eb; --sidebar-width: 250px; }
+        :root { --primary: #6366f1; --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1f2937; --border: #e5e7eb; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); margin: 0; color: var(--text-main); }
         
         /* AUTH UI */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #eef2ff; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; letter-spacing: 1px; transition: 0.3s; }
+        .login-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 360px; text-align: center; transition: 0.3s; }
+        .login-input { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; transition: 0.3s; }
         .login-input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-        .login-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .login-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
-        
-        /* --- NEW LAYOUT STRUCTURE --- */
-        .navbar { background: var(--bg-card); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; box-sizing: border-box; }
-        
-        /* FIXED LEFT SIDEBAR */
-        .sidebar { 
-            position: fixed; 
-            top: 60px; 
-            left: 0; 
-            width: var(--sidebar-width); 
-            height: calc(100vh - 60px); 
-            background: var(--bg-card); 
-            border-right: 1px solid var(--border); 
-            padding: 20px; 
-            box-sizing: border-box;
-            overflow-y: auto;
-            z-index: 900;
-        }
+        .login-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .login-btn:hover { opacity: 0.9; }
+        .login-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .toggle-link { margin-top: 15px; font-size: 13px; color: var(--primary); cursor: pointer; text-decoration: underline; display: block; }
+        .hidden { display: none; }
 
-        /* MAIN CONTENT AREA */
-        main { 
-            margin-left: var(--sidebar-width); 
-            margin-top: 60px; 
-            padding: 30px; 
-            max-width: 1000px;
-        }
-
-        /* HOVER RESPONSIVE MENU */
-        .menu-item { 
-            padding: 12px 15px; 
-            cursor: pointer; 
-            border-radius: 10px; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            margin-bottom: 8px; 
-            color: #4b5563; 
-            font-weight: 500; 
-            transition: all 0.2s ease-in-out; 
-        }
-        .menu-item:hover { 
-            background: #eef2ff; 
-            color: var(--primary); 
-            transform: translateX(5px); /* Move Right on Hover */
-        }
-        .menu-item.active { 
-            background: var(--primary); 
-            color: white; 
-            box-shadow: 0 4px 6px rgba(99,102,241,0.3);
-        }
-        .menu-item.active:hover { transform: none; } /* No move if active */
-
-        /* SECTIONS */
-        .section { display: none; animation: fadeIn 0.4s ease; } .section.active { display: block; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        /* APP UI */
+        .navbar { background: var(--bg-card); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .main-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+        .sidebar { background: var(--bg-card); border-radius: 12px; padding: 15px; height: fit-content; border: 1px solid var(--border); position: sticky; top: 80px; }
+        .menu-item { padding: 12px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; transition:0.2s; }
+        .menu-item:hover { background:#f3f4f6; }
+        .menu-item.active { background: #eef2ff; color: var(--primary); border-left: 4px solid var(--primary); }
+        .section { display: none; animation: fadeIn 0.3s; } .section.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
 
         /* COMPONENTS */
-        .card, .gen-card, .create-post, .post, .settings-group { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 16px; 
-            border: 1px solid var(--border); 
-            margin-bottom: 25px; 
-            transition: 0.3s;
-        }
-        /* Card Hover Effect */
-        .card:hover, .gen-card:hover, .post:hover { 
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); 
-            border-color: #cbd5e1;
-        }
-
-        /* INPUTS & BUTTONS */
-        label { display:block; margin-bottom: 8px; font-weight: 600; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #f8fafc; margin-bottom: 15px; transition:0.2s; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-        
-        .btn-gen { width: 100%; padding: 14px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .btn-gen:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(99,102,241,0.3); }
-        
-        .btn-post { background: var(--primary); color: white; padding: 10px 25px; border-radius: 8px; border: none; cursor: pointer; float: right; font-weight: bold; transition: 0.2s; }
-        .btn-post:hover { background: var(--primary-hover); }
-
-        /* COURSES GRID */
-        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-        .course-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: 0.3s; position: relative; }
-        .course-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: var(--primary); }
-        .course-thumb { height: 150px; background: #e0e7ff; display: flex; align-items: center; justify-content: center; font-size: 45px; color: var(--primary); transition: 0.3s; }
-        .course-card:hover .course-thumb { background: var(--primary); color: white; }
-        
-        /* Add New Course Button */
-        .add-course-card { border: 2px dashed #cbd5e1; display: flex; align-items: center; justify-content: center; flex-direction: column; color: #64748b; min-height: 220px; cursor: pointer; background: transparent; }
-        .add-course-card:hover { border-color: var(--primary); color: var(--primary); background: #f5f3ff; }
-
-        /* Video & Other */
-        .video-player { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .lesson-item { padding: 12px; border-bottom: 1px solid #f1f5f9; cursor: pointer; display: flex; gap: 10px; align-items: center; transition: 0.2s; border-radius: 6px; }
-        .lesson-item:hover { background: #f1f5f9; padding-left: 20px; } /* Slide effect */
-        
-        .profile-pic-large { width: 100px; height: 100px; border-radius: 50%; background: #f1f5f9; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid var(--primary); cursor: pointer; transition:0.3s; }
-        .profile-pic-large:hover { transform: scale(1.05); border-color: var(--primary-hover); }
+        .card, .gen-card, .create-post, .post, .settings-group { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        label { display:block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #4b5563; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #fff; margin-bottom: 10px; }
+        .btn-gen { width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .course-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
+        .course-thumb { height: 140px; background: #e0e7ff; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--primary); }
+        .course-info { padding: 15px; }
+        .add-course-card { border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; flex-direction: column; color: gray; min-height: 200px; cursor: pointer; display: none; } 
+        .video-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .video-player { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; margin-bottom: 15px; }
+        .lesson-list { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 10px; max-height: 500px; overflow-y: auto; }
+        .lesson-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; gap: 10px; align-items: center; }
+        .admin-box { background: #f0fdf4; border: 1px dashed #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; }
+        .admin-btn { padding: 8px 15px; background: #22c55e; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .profile-pic-large { width: 100px; height: 100px; border-radius: 50%; background: #eee; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid var(--primary); cursor: pointer; }
         .profile-pic-large img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-post { background: var(--primary); color: white; padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; float: right; font-weight: bold;}
 
-        /* Admin Controls */
-        .admin-box { background: #f0fdf4; border: 1px dashed #22c55e; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: none; }
-        .admin-btn { padding: 10px 18px; background: #22c55e; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .admin-btn:hover { background: #16a34a; }
-
-        /* Responsive Mobile */
-        @media (max-width: 768px) { 
-            .sidebar { display: none; } /* Hide sidebar on mobile for now */
-            main { margin-left: 0; padding: 15px; margin-top: 60px; }
-            .video-layout { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 768px) { .main-layout, .video-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
     </style>
 </head>
 <body>
 
     <div id="login-overlay">
-        <div class="login-card" id="step-phone">
-            <h2 style="color:var(--primary); margin-bottom:10px;">📱 Login</h2>
-            <p style="color:gray; font-size:13px; margin-bottom:20px;">We will send an SMS code.</p>
-            <input type="tel" id="phoneNumber" class="login-input" placeholder="+66..." value="+66">
-            <div id="recaptcha-container" style="margin-bottom:15px; display:flex; justify-content:center;"></div>
-            <button class="login-btn" id="sendOtpBtn" onclick="sendOTP()">Send SMS Code</button>
+        
+        <div class="login-card" id="login-form">
+            <h2 style="color:var(--primary); margin-bottom:10px;">🚀 Login</h2>
+            
+            <input type="text" id="loginInput" class="login-input" placeholder="Email or Phone (+959...)" oninput="detectInputType(this, 'loginPass')">
+            
+            <input type="password" id="loginPass" class="login-input hidden" placeholder="Password">
+            
+            <div id="recaptcha-container-login" class="hidden" style="margin-bottom:10px; justify-content:center;"></div>
+            
+            <button class="login-btn" id="loginBtn" onclick="handleLogin()">Continue</button>
+            <span class="toggle-link" onclick="toggleAuth('register')">Create New Account</span>
         </div>
-        <div class="login-card" id="step-otp" style="display:none;">
-            <h2 style="color:var(--primary);">🔒 Verify</h2>
-            <p style="color:gray; font-size:13px;">Enter the 6-digit code sent to your phone.</p>
+
+        <div class="login-card" id="register-form" style="display:none;">
+            <h2 style="color:var(--primary); margin-bottom:10px;">🆕 Sign Up</h2>
+            
+            <input type="text" id="regName" class="login-input" placeholder="Full Name">
+            <input type="text" id="regInput" class="login-input" placeholder="Email or Phone (+959...)" oninput="detectInputType(this, 'regPass')">
+            
+            <input type="password" id="regPass" class="login-input hidden" placeholder="Password (Min 6 chars)">
+            
+            <div id="recaptcha-container-reg" class="hidden" style="margin-bottom:10px; justify-content:center;"></div>
+
+            <button class="login-btn" id="regBtn" onclick="handleRegister()">Sign Up</button>
+            <span class="toggle-link" onclick="toggleAuth('login')">Back to Login</span>
+        </div>
+
+        <div class="login-card" id="otp-form" style="display:none;">
+            <h2 style="color:var(--primary);">🔒 Verify OTP</h2>
+            <p style="color:gray; font-size:13px;">Enter the code sent to your phone.</p>
             <input type="text" id="otpCode" class="login-input" placeholder="123456" style="text-align:center; letter-spacing:5px;">
             <button class="login-btn" onclick="verifyOTP()">Verify & Login</button>
-            <p onclick="location.reload()" style="font-size:12px; color:red; cursor:pointer; margin-top:15px;">Try Again</p>
+            <p onclick="location.reload()" style="font-size:12px; color:red; cursor:pointer; margin-top:15px;">Cancel</p>
         </div>
+
     </div>
 
     <div id="app-content" style="display:none;">
         <nav class="navbar">
-            <div class="logo" onclick="location.reload()" style="font-size:22px; font-weight:800; color:var(--primary);"><i class="fas fa-rocket"></i> MyClass</div>
-            <div style="display:flex; align-items:center; gap:15px;">
-                <span style="font-weight:bold; color:#4b5563;" id="navUserName">User</span>
-                <div style="width:38px; height:38px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden; border:2px solid #e0e7ff;">
+            <div class="logo" onclick="location.reload()" style="font-size:22px; font-weight:800; color:var(--primary);">🚀 MyClass</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-weight:bold;" id="navUserName">User</span>
+                <div style="width:35px; height:35px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden;">
                     <img id="navUserPic" src="" style="width:100%; height:100%; object-fit:cover; display:none;">
                     <span id="navUserInitial">U</span>
                 </div>
             </div>
         </nav>
 
-        <aside class="sidebar">
-            <div class="menu-item active" id="nav-feed" onclick="switchTab('feed')"><i class="fas fa-home"></i> Home</div>
-            <div class="menu-item" id="nav-gen" onclick="switchTab('generator')"><i class="fas fa-magic"></i> AI Generator</div>
-            <div class="menu-item" id="nav-courses" onclick="switchTab('courses')"><i class="fas fa-graduation-cap"></i> My Courses</div>
-            <div class="menu-item" id="nav-settings" onclick="switchTab('settings')"><i class="fas fa-cog"></i> Settings</div>
-            <div style="margin-top:auto; padding-top:20px; border-top:1px solid #eee;">
-                <div class="menu-item" onclick="logoutUser()" style="color:#ef4444;"><i class="fas fa-sign-out-alt"></i> Logout</div>
-            </div>
-        </aside>
+        <div class="main-layout">
+            <aside class="sidebar">
+                <div class="menu-item active" id="nav-feed" onclick="switchTab('feed')">🏠 Home</div>
+                <div class="menu-item" id="nav-gen" onclick="switchTab('generator')">✨ AI Generator</div>
+                <div class="menu-item" id="nav-courses" onclick="switchTab('courses')">🎓 My Courses</div>
+                <div class="menu-item" id="nav-settings" onclick="switchTab('settings')">⚙️ Settings</div>
+                <div class="menu-item" onclick="logoutUser()" style="color:red;">🚪 Logout</div>
+            </aside>
 
-        <main>
-            <div id="feed-section" class="section active">
-                <div class="create-post">
-                    <h2 style="margin-top:0; font-size:18px; margin-bottom:15px;">👋 Hello! What's new?</h2>
-                    <textarea id="postInput" rows="3" placeholder="Share something with your class..."></textarea>
-                    <button onclick="addPost()" class="btn-post"><i class="fas fa-paper-plane"></i> Post</button>
-                    <div style="clear:both;"></div>
+            <main>
+                <div id="feed-section" class="section active">
+                    <div class="create-post">
+                        <textarea id="postInput" rows="3" placeholder="Post something..."></textarea>
+                        <button onclick="addPost()" class="btn-post">Post</button>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="feedStream">Loading...</div>
                 </div>
-                <div id="feedStream">Loading...</div>
-            </div>
 
-            <div id="generator-section" class="section">
-                <div class="gen-card">
-                    <h2 style="margin-top:0; color:var(--primary);"><i class="fas fa-robot"></i> AI Content Studio</h2>
-                    <label>Topic</label> <input type="text" id="topic" placeholder="Topic...">
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
-                        <div><label>Type</label><select id="contentType"><option>Brand Awareness</option><option>Engagement</option><option>Sales</option></select></div>
-                        <div><label>Platform</label><select id="platform"><option>Facebook</option><option>TikTok</option></select></div>
-                    </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
-                        <div><label>Audience</label><input type="text" id="target" placeholder="Students..."></div>
-                        <div><label>Tone</label><select id="tone"><option>Professional</option><option>Funny</option></select></div>
-                    </div>
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
-                        <div><label>Creativity</label><select id="creativity"><option>Standard</option><option>High</option></select></div>
-                        <div><label>Length</label><select id="length"><option>Medium</option><option>Short</option></select></div>
-                    </div>
-                    <button class="btn-gen" id="genBtn" onclick="generateContent()">✨ Generate Magic</button>
-                    <div id="output" class="result-box" style="background:#f8f9fa; padding:20px; margin-top:20px; border:1px solid #e2e8f0; min-height:100px; border-radius:12px; line-height:1.6;"></div>
-                    <button class="btn-gen" style="background:#10b981; display:none;" id="useBtn" onclick="sendToFeed()">📝 Use this Post</button>
-                </div>
-            </div>
-
-            <div id="courses-section" class="section">
-                <div id="course-list-view">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                        <h2 style="margin:0;">🎓 My Learning</h2>
-                        <span id="adminBadge" style="display:none; background:#fee2e2; color:#ef4444; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:bold;">ADMIN</span>
-                    </div>
-                    <div class="course-grid" id="courseGrid">
-                        <div class="course-card" onclick="openDefaultCourse('webdev')"><div class="course-thumb">💻</div><div class="course-info"><h3>Web Development</h3><span>5 Videos</span></div></div>
-                        <div class="course-card" onclick="openDefaultCourse('marketing')"><div class="course-thumb">📈</div><div class="course-info"><h3>Digital Marketing</h3><span>5 Videos</span></div></div>
-                        <div class="course-card add-course-card" id="adminAddCourseBtn" onclick="toggleAddCourseForm()"><i class="fas fa-plus-circle" style="font-size:30px;"></i><br><b>Add New Course</b></div>
-                    </div>
-                    <div id="add-course-form" style="display:none; margin-top:20px; background:#fff; border:1px solid var(--border); padding:20px; border-radius:12px;">
-                        <h3>Create New Course</h3>
-                        <input type="text" id="newCourseTitle" placeholder="Course Title"> <input type="text" id="newCourseDesc" placeholder="Desc">
-                        <button class="admin-btn" onclick="createNewCourse()">Create</button> <button class="admin-btn" style="background:gray;" onclick="toggleAddCourseForm()">Cancel</button>
-                    </div>
-                </div>
-                <div id="course-player-view" style="display:none;">
-                    <button onclick="backToCourses()" style="margin-bottom:15px; border:none; background:none; color:var(--primary); font-weight:bold; font-size:16px;"><i class="fas fa-arrow-left"></i> Back to Courses</button>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><h2 id="playerTitle" style="margin:0;">Course</h2><button id="deleteCourseBtn" onclick="deleteCurrentCourse()" style="display:none; color:red; background:none; border:none; cursor:pointer;"><i class="fas fa-trash"></i> Delete Course</button></div>
-                    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
-                        <div>
-                            <iframe id="mainVideo" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
-                            <div class="admin-box" id="adminVideoBox">
-                                <h4><i class="fas fa-plus"></i> Add Video</h4>
-                                <input type="text" id="newVideoTitle" placeholder="Video Title">
-                                <div style="display:flex; gap:10px;"><input type="text" id="newVideoLink" placeholder="YouTube Link" style="flex:1; margin-bottom:0;"><button class="admin-btn" onclick="addVideoToCourse()">Add</button></div>
-                            </div>
+                <div id="generator-section" class="section">
+                    <div class="gen-card">
+                        <h2 style="margin-top:0; color:var(--primary);">✨ AI Content Studio</h2>
+                        <label>Topic</label> <input type="text" id="topic" placeholder="Topic...">
+                        <div class="input-grid">
+                            <div><label>Type</label><select id="contentType"><option>Brand Awareness</option><option>Engagement</option><option>Sales</option></select></div>
+                            <div><label>Platform</label><select id="platform"><option>Facebook</option><option>TikTok</option></select></div>
                         </div>
-                        <div class="lesson-list" id="lessonList"></div>
+                        <div class="input-grid">
+                            <div><label>Audience</label><input type="text" id="target" placeholder="Students..."></div>
+                            <div><label>Tone</label><select id="tone"><option>Professional</option><option>Funny</option></select></div>
+                        </div>
+                        <div class="input-grid">
+                            <div><label>Creativity</label><select id="creativity"><option>Standard</option><option>High</option></select></div>
+                            <div><label>Length</label><select id="length"><option>Medium</option><option>Short</option></select></div>
+                        </div>
+                        <button class="btn-gen" id="genBtn" onclick="generateContent()">✨ Generate</button>
+                        <div id="output" class="result-box" style="background:#f8f9fa; padding:15px; margin-top:15px; border:1px solid #ddd; min-height:80px; white-space:pre-wrap;"></div>
+                        <button class="btn-gen" style="background:#10b981; display:none;" id="useBtn" onclick="sendToFeed()">📝 Send to Feed</button>
                     </div>
                 </div>
-            </div>
 
-            <div id="settings-section" class="section">
-                <h2>⚙️ Settings</h2>
-                <div class="settings-group">
-                    <div class="profile-pic-large" onclick="triggerFileInput()"><img id="settingUserPic" src="" style="display:none;"><span id="settingUserInitial">U</span></div>
-                    <p style="text-align:center; font-size:12px; color:gray;">Tap to change (Max 500KB)</p>
-                    <input type="file" id="profileInput" accept="image/*" style="display:none" onchange="updateProfilePic(this)">
-                    <label>Phone Number</label><input type="text" id="settingPhone" readonly style="background:#f1f5f9;">
-                    <label>User ID</label><input type="text" id="settingUid" readonly style="background:#f1f5f9; font-size:12px; color:gray;">
+                <div id="courses-section" class="section">
+                    <div id="course-list-view">
+                        <div style="display:flex; justify-content:space-between;"><h2>🎓 My Learning</h2><span id="adminBadge" style="display:none; color:red; font-weight:bold;">ADMIN</span></div>
+                        <div class="course-grid" id="courseGrid">
+                            <div class="course-card" onclick="openDefaultCourse('webdev')"><div class="course-thumb" style="background:#3b82f6;">💻</div><div class="course-info"><h3>Web Development</h3><span>5 Videos</span></div></div>
+                            <div class="course-card" onclick="openDefaultCourse('marketing')"><div class="course-thumb" style="background:#ec4899;">📈</div><div class="course-info"><h3>Digital Marketing</h3><span>5 Videos</span></div></div>
+                            <div class="course-card add-course-card" id="adminAddCourseBtn" onclick="toggleAddCourseForm()"><i class="fas fa-plus-circle" style="font-size:30px;"></i><b>Add New</b></div>
+                        </div>
+                        <div id="add-course-form" style="display:none; margin-top:20px; background:#eef2ff; padding:20px;">
+                            <input type="text" id="newCourseTitle" placeholder="Title"> <input type="text" id="newCourseDesc" placeholder="Desc">
+                            <button class="admin-btn" onclick="createNewCourse()">Create</button> <button class="admin-btn" style="background:gray;" onclick="toggleAddCourseForm()">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="course-player-view" style="display:none;">
+                        <button onclick="backToCourses()" style="margin-bottom:10px; border:none; background:none; color:var(--primary);">← Back</button>
+                        <div style="display:flex; justify-content:space-between;"><h2 id="playerTitle">Course</h2><button id="deleteCourseBtn" onclick="deleteCurrentCourse()" style="display:none; color:red; background:none; border:none;">Delete</button></div>
+                        <div class="video-layout">
+                            <div>
+                                <iframe id="mainVideo" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
+                                <div class="admin-box" id="adminVideoBox">
+                                    <input type="text" id="newVideoTitle" placeholder="Title">
+                                    <div style="display:flex;"><input type="text" id="newVideoLink" class="admin-input" placeholder="YouTube Link"><button class="admin-btn" onclick="addVideoToCourse()">Add</button></div>
+                                </div>
+                            </div>
+                            <div class="lesson-list" id="lessonList"></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </main>
+
+                <div id="settings-section" class="section">
+                    <h2>⚙️ Settings</h2>
+                    <div class="settings-group">
+                        <div class="profile-pic-large" onclick="triggerFileInput()"><img id="settingUserPic" src="" style="display:none;"><span id="settingUserInitial">U</span></div>
+                        <p style="text-align:center; font-size:12px; color:gray;">Tap to change</p>
+                        <input type="file" id="profileInput" accept="image/*" style="display:none" onchange="updateProfilePic(this)">
+                        <label>Contact</label><input type="text" id="settingContact" readonly style="background:#eee;">
+                        <label>UID</label><input type="text" id="settingUid" readonly style="background:#eee; font-size:12px;">
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, arrayUnion, deleteDoc, getDocs, where, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } 
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
         from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -270,65 +209,154 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // 🔐 ADMIN CONFIG
+        // 🔐 CONFIG
         const ENCODED_KEY = "QUl6YVN5Q1Z6YUEyQlJGYndfbmcxVmpRWldYNU55TlAtZlItYURR"; 
         const MODEL_NAME = "gemini-2.5-flash";
-        
-        // 👑 ADMIN PHONE (Updated to +66...)
-        const ADMIN_PHONE = "+66810733351"; 
+        const ADMIN_PHONE = "+66810733351"; // Admin Phone
 
         let confirmationResult = null;
         let isAdmin = false;
         let currentCourseId = null;
         let isDefaultCourse = false;
+        let tempRegName = "";
 
-        window.onload = () => {
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'normal' });
-            window.recaptchaVerifier.render();
-        };
+        // --- UNIFIED AUTH LOGIC ---
+        window.toggleAuth = (v) => {
+            document.getElementById('login-form').style.display = v==='login'?'block':'none';
+            document.getElementById('register-form').style.display = v==='register'?'block':'none';
+            document.getElementById('otp-form').style.display = 'none';
+        }
 
-        window.sendOTP = async () => {
-            const phoneNumber = document.getElementById('phoneNumber').value;
-            if(phoneNumber.length < 8) { alert("Invalid phone number"); return; }
-            const btn = document.getElementById('sendOtpBtn');
-            btn.disabled = true; btn.innerText = "Sending SMS...";
-            const appVerifier = window.recaptchaVerifier;
-            try {
-                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
-                document.getElementById('step-phone').style.display = 'none';
-                document.getElementById('step-otp').style.display = 'block';
-            } catch (error) {
-                console.error(error);
-                alert("SMS Error: " + error.message);
-                btn.disabled = false; btn.innerText = "Send SMS Code";
-                window.recaptchaVerifier.reset();
+        // Detect if Email or Phone
+        window.detectInputType = (input, passId) => {
+            const val = input.value;
+            const passField = document.getElementById(passId);
+            // If has @ it is Email, else if has numbers it is Phone
+            if (val.includes('@')) {
+                passField.style.display = 'block';
+            } else {
+                passField.style.display = 'none';
             }
         }
 
+        // SETUP RECAPTCHA
+        const setupRecaptcha = (containerId) => {
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+                    'size': 'normal',
+                    'callback': () => { console.log("Recaptcha Verified"); }
+                });
+                window.recaptchaVerifier.render();
+            }
+        }
+
+        // LOGIN HANDLER
+        window.handleLogin = async () => {
+            const input = document.getElementById('loginInput').value;
+            const pass = document.getElementById('loginPass').value;
+            const btn = document.getElementById('loginBtn');
+
+            if(input.includes('@')) {
+                // EMAIL LOGIN
+                if(!pass) { alert("Enter Password"); return; }
+                try { await signInWithEmailAndPassword(auth, input, pass); }
+                catch(e) { alert("Login Error: " + e.message); }
+            } else {
+                // PHONE LOGIN
+                if(input.length < 8) { alert("Invalid Phone"); return; }
+                btn.disabled = true; btn.innerText = "Sending SMS...";
+                
+                // Show Recaptcha Container
+                document.getElementById('recaptcha-container-login').style.display = 'flex';
+                setupRecaptcha('recaptcha-container-login');
+
+                try {
+                    confirmationResult = await signInWithPhoneNumber(auth, input, window.recaptchaVerifier);
+                    document.getElementById('login-form').style.display = 'none';
+                    document.getElementById('otp-form').style.display = 'block';
+                } catch(e) {
+                    console.error(e);
+                    alert("SMS Error: " + e.message);
+                    btn.disabled = false; btn.innerText = "Continue";
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null; // Reset
+                }
+            }
+        }
+
+        // REGISTER HANDLER
+        window.handleRegister = async () => {
+            const input = document.getElementById('regInput').value;
+            const pass = document.getElementById('regPass').value;
+            const name = document.getElementById('regName').value;
+            const btn = document.getElementById('regBtn');
+
+            if(!name) { alert("Enter Name"); return; }
+            tempRegName = name;
+
+            if(input.includes('@')) {
+                // EMAIL REGISTER
+                if(pass.length < 6) { alert("Password short"); return; }
+                try {
+                    const uc = await createUserWithEmailAndPassword(auth, input, pass);
+                    await updateProfile(uc.user, { displayName: name });
+                    await addDoc(collection(db, "users"), { uid: uc.user.uid, name: name, email: input, profilePic: null });
+                    alert("Account Created!");
+                } catch(e) { alert("Error: " + e.message); }
+            } else {
+                // PHONE REGISTER
+                if(input.length < 8) { alert("Invalid Phone"); return; }
+                btn.disabled = true; btn.innerText = "Sending SMS...";
+                
+                document.getElementById('recaptcha-container-reg').style.display = 'flex';
+                setupRecaptcha('recaptcha-container-reg');
+
+                try {
+                    confirmationResult = await signInWithPhoneNumber(auth, input, window.recaptchaVerifier);
+                    document.getElementById('register-form').style.display = 'none';
+                    document.getElementById('otp-form').style.display = 'block';
+                } catch(e) {
+                    console.error(e);
+                    alert("SMS Error: " + e.message);
+                    btn.disabled = false; btn.innerText = "Sign Up";
+                    window.recaptchaVerifier.clear();
+                    window.recaptchaVerifier = null;
+                }
+            }
+        }
+
+        // VERIFY OTP
         window.verifyOTP = async () => {
             const code = document.getElementById('otpCode').value;
             if(!code) return;
             try {
                 const result = await confirmationResult.confirm(code);
                 const user = result.user;
+                // If new user (check via DB), save name
                 const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
                 const snap = await getDocs(q);
-                if(snap.empty) await addDoc(collection(db, "users"), { uid: user.uid, phone: user.phoneNumber, profilePic: null });
-            } catch (error) { alert("Wrong Code"); }
+                if(snap.empty) {
+                    await updateProfile(user, { displayName: tempRegName || "User" });
+                    await addDoc(collection(db, "users"), { uid: user.uid, name: tempRegName || "User", phone: user.phoneNumber, profilePic: null });
+                }
+            } catch(e) { alert("Wrong Code"); }
         }
 
         window.logoutUser = () => signOut(auth);
 
+        // --- AUTH LISTENER ---
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
-                const phone = user.phoneNumber;
-                document.getElementById('navUserName').innerText = phone;
-                document.getElementById('settingPhone').value = phone;
+                
+                const identifier = user.phoneNumber || user.email;
+                document.getElementById('navUserName').innerText = user.displayName || "User";
+                document.getElementById('settingContact').value = identifier;
                 document.getElementById('settingUid').value = user.uid;
 
-                isAdmin = (phone === ADMIN_PHONE);
+                // Admin Check
+                isAdmin = (user.phoneNumber === ADMIN_PHONE || user.email === "admin@myclass.com");
                 if(isAdmin) {
                     document.getElementById('adminBadge').style.display = 'block';
                     document.getElementById('adminAddCourseBtn').style.display = 'flex';
@@ -337,6 +365,7 @@
                     document.getElementById('adminAddCourseBtn').style.display = 'none';
                 }
 
+                // Load Profile
                 const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
                 const snap = await getDocs(q);
                 if(!snap.empty) {
@@ -353,11 +382,11 @@
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
                 document.getElementById('app-content').style.display = 'none';
-                document.getElementById('step-phone').style.display = 'block';
-                document.getElementById('step-otp').style.display = 'none';
+                window.recaptchaVerifier = null; // Reset ReCaptcha
             }
         });
 
+        // --- GENERATOR & APP LOGIC ---
         window.triggerFileInput = () => document.getElementById('profileInput').click();
         window.updateProfilePic = (input) => {
             const file = input.files[0]; if(!file) return;
@@ -375,8 +404,6 @@
                         document.getElementById('navUserPic').style.display='block';
                         document.getElementById('settingUserPic').src = base64;
                         document.getElementById('settingUserPic').style.display='block';
-                    } else {
-                        await addDoc(collection(db, "users"), { uid: user.uid, phone: user.phoneNumber, profilePic: base64 });
                     }
                 }
             };
@@ -404,7 +431,7 @@
         window.sendToFeed = () => { window.switchTab('feed'); document.getElementById('postInput').value = document.getElementById('output').innerText; }
         window.addPost = async () => {
             const txt = document.getElementById('postInput').value; if(!txt) return;
-            await addDoc(collection(db, "posts"), { content: txt, username: auth.currentUser.phoneNumber||"User", timestamp: serverTimestamp() });
+            await addDoc(collection(db, "posts"), { content: txt, username: auth.currentUser.displayName||"User", timestamp: serverTimestamp() });
             document.getElementById('postInput').value = "";
         }
         onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (s)=>{
