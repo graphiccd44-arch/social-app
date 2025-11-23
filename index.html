@@ -3,116 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Content Generator (Pro)</title>
+    <title>My Class Feed & AI Tool</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg-body: #f3f4f6; --bg-card: #ffffff; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); margin: 0; padding: 20px; }
-        .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 350px 1fr; gap: 20px; }
+        :root { --primary: #6366f1; --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1f2937; --border: #e5e7eb; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); margin: 0; color: var(--text-main); }
         
-        /* Card Styles */
-        .card { background: var(--bg-card); padding: 25px; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 20px; border: 1px solid #e5e7eb; }
-        h2 { margin-top: 0; font-size: 18px; color: #1f2937; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+        /* Navbar */
+        .navbar { background: var(--bg-card); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .logo { font-weight: 800; color: var(--primary); font-size: 22px; text-decoration: none; display:flex; align-items:center; gap:5px;}
         
-        /* Inputs Grid */
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        /* Layout */
+        .main-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         
-        /* Form Elements */
-        label { display:block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #4b5563; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #fff; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+        /* Sidebar */
+        .sidebar { background: var(--bg-card); border-radius: 12px; padding: 15px; height: fit-content; border: 1px solid var(--border); position: sticky; top: 80px; }
+        .menu-item { padding: 12px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 12px; color: #4b5563; font-weight: 500; transition: 0.2s; margin-bottom: 5px; }
+        .menu-item:hover { background: #f3f4f6; color: var(--primary); }
+        .menu-item.active { background: #eef2ff; color: var(--primary); border-left: 4px solid var(--primary); }
         
-        /* Generator Button */
-        .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2); }
-        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 8px rgba(99, 102, 241, 0.3); }
-        .btn:disabled { background: #9ca3af; cursor: not-allowed; transform: none; box-shadow: none; }
+        /* Main Content Sections */
+        .section { display: none; animation: fadeIn 0.3s; }
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Output Area */
-        .result-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 10px; margin-top: 15px; min-height: 120px; white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #334155; position: relative; }
+        /* --- FEED STYLES --- */
+        .create-post { background: var(--bg-card); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
+        textarea { width: 100%; border: none; resize: none; outline: none; font-family: inherit; font-size: 16px; padding: 10px 0; }
+        .post { background: var(--bg-card); border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .post-header { display: flex; align-items: center; margin-bottom: 12px; }
+        .avatar { width: 40px; height: 40px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; }
         
-        /* Feed Post */
-        .post { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e5e7eb; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
-        .post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-        .avatar { width: 40px; height: 40px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 18px; }
+        /* --- GENERATOR STYLES --- */
+        .gen-card { background: var(--bg-card); padding: 30px; border-radius: 16px; border: 1px solid var(--border); max-width: 800px; margin: 0 auto; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         
-        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
+        label { display:block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #4b5563; text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #fff; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); }
+        
+        .btn-gen { width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 14px; margin-top: 10px;}
+        .btn-gen:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3); }
+        
+        .btn-post { background: var(--primary); color: white; padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; float: right; font-weight: bold;}
+
+        .result-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 10px; margin-top: 20px; min-height: 100px; white-space: pre-wrap; font-size: 15px; line-height: 1.6; color: #334155; position: relative; }
+
+        @media (max-width: 768px) { .main-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div class="left-panel">
-            <div class="card">
-                <h2>✨ AI Content Generator</h2>
-                
-                <label>Topic (ခေါင်းစဉ်)</label>
-                <input type="text" id="topic" placeholder="e.g. Eyewear Promotion...">
-                
-                <div class="input-grid">
-                    <div>
-                        <label>Platform</label>
-                        <select id="platform">
-                            <option value="Facebook">Facebook</option>
-                            <option value="TikTok">TikTok (Script)</option>
-                            <option value="Telegram">Telegram Channel</option>
-                            <option value="YouTube">YouTube Description</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Target Audience</label>
-                        <input type="text" id="target" placeholder="e.g. Students">
+    <nav class="navbar">
+        <a href="#" class="logo" onclick="location.reload()"><span>🚀 MyClass</span></a>
+        <div style="font-weight:bold; color:gray;">v10.0</div>
+    </nav>
+
+    <div class="main-layout">
+        <aside class="sidebar">
+            <div class="menu-item active" id="menu-feed" onclick="switchTab('feed')">
+                <i class="fas fa-home"></i> News Feed
+            </div>
+            <div class="menu-item" id="menu-gen" onclick="switchTab('generator')">
+                <i class="fas fa-magic" style="color: #8b5cf6;"></i> AI Content Generator
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-book"></i> My Learning
+            </div>
+            <div class="menu-item">
+                <i class="fas fa-cog"></i> Settings
+            </div>
+        </aside>
+
+        <main>
+            <div id="feed-section" class="section active">
+                <div class="create-post">
+                    <textarea id="postInput" rows="3" placeholder="What's on your mind?"></textarea>
+                    <div style="overflow:hidden; margin-top:10px;">
+                        <button class="btn-post" onclick="addPost()">Post</button>
                     </div>
                 </div>
 
-                <div class="input-grid">
-                    <div>
-                        <label>Tone (လေသံ)</label>
-                        <select id="tone">
-                            <option value="Professional">Professional</option>
-                            <option value="Funny & Witty">Funny & Witty</option>
-                            <option value="Emotional">Emotional Story</option>
-                            <option value="Sales & Urgent">Hard Sell</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label>Creativity</label>
-                        <select id="creativity">
-                            <option value="Standard">Standard</option>
-                            <option value="High">High (Creative)</option>
-                            <option value="Max">Max (Crazy)</option>
-                        </select>
-                    </div>
+                <div id="feedStream">
+                    <div style="text-align:center; color:gray; padding:20px;">Connecting to Feed...</div>
                 </div>
+            </div>
 
-                <label>Length (စာအရှည်)</label>
-                <select id="length">
-                    <option value="Medium">Medium (ပုံမှန်)</option>
-                    <option value="Short">Short (စာတို)</option>
-                    <option value="Long">Long (ဆောင်းပါးရှည်)</option>
-                </select>
+            <div id="generator-section" class="section">
+                <div class="gen-card">
+                    <h2 style="margin-top:0; color:var(--primary);"><i class="fas fa-robot"></i> AI Content Studio</h2>
+                    
+                    <label>Topic (ခေါင်းစဉ်)</label>
+                    <input type="text" id="topic" placeholder="e.g. Eyewear Promotion..." style="margin-bottom:15px;">
+                    
+                    <div class="input-grid">
+                        <div>
+                            <label>Platform</label>
+                            <select id="platform">
+                                <option value="Facebook">Facebook</option>
+                                <option value="TikTok">TikTok (Script)</option>
+                                <option value="Telegram">Telegram Channel</option>
+                                <option value="YouTube">YouTube Description</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Target Audience</label>
+                            <input type="text" id="target" placeholder="e.g. Students">
+                        </div>
+                    </div>
 
-                <button class="btn" id="genBtn" onclick="generateContent()">Generate Content 🚀</button>
-                
-                <div class="result-box" id="output">
-                    Generated content will appear here...
+                    <div class="input-grid">
+                        <div>
+                            <label>Tone (လေသံ)</label>
+                            <select id="tone">
+                                <option value="Professional">Professional</option>
+                                <option value="Funny & Witty">Funny & Witty</option>
+                                <option value="Emotional">Emotional Story</option>
+                                <option value="Sales & Urgent">Hard Sell</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Creativity</label>
+                            <select id="creativity">
+                                <option value="Standard">Standard</option>
+                                <option value="High">High (Creative)</option>
+                                <option value="Max">Max (Crazy)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <label>Length</label>
+                    <select id="length">
+                        <option value="Medium">Medium (ပုံမှန်)</option>
+                        <option value="Short">Short (စာတို)</option>
+                        <option value="Long">Long (ဆောင်းပါးရှည်)</option>
+                    </select>
+
+                    <button class="btn-gen" id="genBtn" onclick="generateContent()">✨ Generate Content</button>
+                    
+                    <div class="result-box" id="output">Generated content will appear here...</div>
+                    
+                    <button class="btn-gen" style="background:#10b981; display:none;" id="useBtn" onclick="sendToFeed()">
+                        📝 Use this Post (Send to Feed)
+                    </button>
                 </div>
-                <button class="btn" style="background:#10b981; margin-top:10px; display:none;" id="useBtn" onclick="sendToFeed()">Use this Post</button>
             </div>
-        </div>
-
-        <div class="right-panel">
-            <div class="card">
-                <h2>📝 Create Post</h2>
-                <textarea id="postInput" rows="4" placeholder="Review and edit your AI content here..."></textarea>
-                <button class="btn" onclick="addPost()">Post to Feed</button>
-            </div>
-
-            <div id="feedStream">
-                <div style="text-align:center; color:gray; padding:20px;">Loading Feed...</div>
-            </div>
-        </div>
-
+        </main>
     </div>
 
     <script type="module">
@@ -132,19 +168,18 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- 🔐 YOUR SECRET KEY (Inserted Successfully) ---
-        const ENCODED_KEY = "QUl6YVN5Q1Z6YUEyQlJGYndfbmcxVmpRWldYNU55TlAtZlItYURR"; 
+        // --- ⚙️ CONFIGURATION ---
+        const MODEL_NAME = "gemini-1.5-flash"; // Change to "gemini-2.5-flash" if needed later
+        const ENCODED_KEY = "QUl6YVN5Q1Z6YUEyQlJGYndfbmcxVmpRWldYNU55TlAtZlItYURR"; // Your Base64 Key
 
         // --- GENERATOR LOGIC ---
         window.generateContent = async function() {
-            // Get all values
             const topic = document.getElementById('topic').value;
             const platform = document.getElementById('platform').value;
             const target = document.getElementById('target').value || "General Audience";
             const tone = document.getElementById('tone').value;
             const creativity = document.getElementById('creativity').value;
             const length = document.getElementById('length').value;
-
             const btn = document.getElementById('genBtn');
             const output = document.getElementById('output');
 
@@ -157,43 +192,76 @@
 
             btn.disabled = true;
             btn.innerText = "Writing Magic...";
-            output.innerText = "AI is thinking...";
+            output.innerText = "Connecting to Google AI...";
 
-            // Construct Complex Prompt
             const prompt = `
-            Act as a professional Social Media Manager.
+            Act as a Social Media Manager.
             Write a ${length} content piece for ${platform}.
             Topic: "${topic}"
             Target Audience: ${target}
             Tone: ${tone}
             Creativity Level: ${creativity}
             Language: Burmese (Myanmar).
-            Include relevant emojis and hashtags. 
-            Format it beautifully.
+            Include relevant emojis and hashtags. Format correctly.
             `;
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${REAL_KEY}`, {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${REAL_KEY}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
                 });
 
-                if (!response.ok) throw new Error("API Connection Error");
-
                 const data = await response.json();
+
+                if (!response.ok) {
+                    console.error("Google Error:", data);
+                    output.innerText = "GOOGLE ERROR: " + (data.error?.message || JSON.stringify(data));
+                    btn.disabled = false;
+                    btn.innerText = "✨ Generate Content";
+                    return;
+                }
+
                 output.innerText = data.candidates[0].content.parts[0].text;
                 document.getElementById('useBtn').style.display = 'block';
 
             } catch (e) {
                 console.error(e);
-                output.innerText = "Error: " + e.message;
+                output.innerText = "NETWORK ERROR: " + e.message;
             }
             btn.disabled = false;
-            btn.innerText = "Generate Content 🚀";
+            btn.innerText = "✨ Generate Content";
         }
 
-        window.sendToFeed = () => document.getElementById('postInput').value = document.getElementById('output').innerText;
+        // --- TAB SWITCHING LOGIC ---
+        window.switchTab = function(tabName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            // Reset Sidebar active state
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+
+            if (tabName === 'feed') {
+                document.getElementById('feed-section').classList.add('active');
+                document.getElementById('menu-feed').classList.add('active');
+            } else if (tabName === 'generator') {
+                document.getElementById('generator-section').classList.add('active');
+                document.getElementById('menu-gen').classList.add('active');
+            }
+        }
+
+        // --- SEND TO FEED LOGIC ---
+        window.sendToFeed = function() {
+            // Get the generated text
+            const text = document.getElementById('output').innerText;
+            // Switch to Feed Tab
+            window.switchTab('feed');
+            // Put text into Post Input
+            document.getElementById('postInput').value = text;
+            // Optional: Scroll to top
+            window.scrollTo(0,0);
+        }
+
+        // --- FIREBASE POST LOGIC ---
         window.addPost = async () => {
             const txt = document.getElementById('postInput').value;
             if(!txt) return;
