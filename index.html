@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Class Platform (Easy Login)</title>
+    <title>My Class Platform (Admin Secured)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #6366f1; --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1f2937; --border: #e5e7eb; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); margin: 0; color: var(--text-main); }
         
-        /* LOGIN UI */
+        /* AUTH UI */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #eef2ff; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; }
         .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
@@ -17,36 +17,50 @@
         .login-btn:hover { opacity:0.9; }
         .toggle-link { margin-top: 15px; font-size: 13px; color: var(--primary); cursor: pointer; text-decoration: underline; display: block; }
 
-        /* APP UI */
+        /* LAYOUT */
         .navbar { background: var(--bg-card); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         .main-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
         .sidebar { background: var(--bg-card); border-radius: 12px; padding: 15px; height: fit-content; border: 1px solid var(--border); position: sticky; top: 80px; }
-        .menu-item { padding: 12px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; }
+        .menu-item { padding: 12px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; transition:0.2s; }
+        .menu-item:hover { background:#f3f4f6; }
         .menu-item.active { background: #eef2ff; color: var(--primary); border-left: 4px solid var(--primary); }
-        .section { display: none; } .section.active { display: block; }
-        
-        /* Components */
+        .section { display: none; animation: fadeIn 0.3s; } .section.active { display: block; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+
+        /* COMPONENTS */
         .card, .gen-card, .create-post, .post, .settings-group { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
+        
+        /* GENERATOR FULL STYLES */
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         label { display:block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #4b5563; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #fff; margin-bottom: 15px; }
-        .btn-gen { width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px;}
-        
-        /* Course & Video */
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #fff; margin-bottom: 10px; }
+        .btn-gen { width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; transition:0.2s; }
+        .btn-gen:hover { transform:translateY(-2px); box-shadow: 0 4px 10px rgba(99,102,241,0.3); }
+
+        /* COURSE STYLES */
         .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .course-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
+        .course-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .course-thumb { height: 140px; background: #e0e7ff; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--primary); }
         .course-info { padding: 15px; }
-        .add-course-card { border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; flex-direction: column; color: gray; min-height: 200px; cursor: pointer; }
+        .add-course-card { border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; flex-direction: column; color: gray; min-height: 200px; cursor: pointer; display: none; } /* Hidden by default */
+        
+        /* PLAYER */
         .video-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .video-player { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; margin-bottom: 15px; }
         .lesson-list { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 10px; max-height: 500px; overflow-y: auto; }
         .lesson-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; gap: 10px; align-items: center; }
+        .lesson-item:hover { background: #f9fafb; }
+
+        /* PROFILE PIC */
+        .profile-pic-large { width: 100px; height: 100px; border-radius: 50%; background: #eee; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid var(--primary); cursor: pointer; position: relative; }
+        .profile-pic-large img { width: 100%; height: 100%; object-fit: cover; }
+
+        .btn-post { background: var(--primary); color: white; padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; float: right; font-weight: bold;}
         
-        /* Admin & Profile */
-        .admin-box { background: #f0fdf4; border: 1px dashed #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        /* Admin Box */
+        .admin-box { background: #f0fdf4; border: 1px dashed #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; }
         .admin-btn { padding: 8px 15px; background: #22c55e; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .profile-pic-large { width: 100px; height: 100px; border-radius: 50%; background: #eee; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid var(--primary); cursor: pointer;}
 
         @media (max-width: 768px) { .main-layout, .video-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
     </style>
@@ -56,7 +70,7 @@
     <div id="login-overlay">
         <div class="login-card" id="login-form">
             <h2 style="color:var(--primary); margin-bottom:10px;">🚀 Login</h2>
-            <input type="email" id="loginEmail" class="login-input" placeholder="Email Address">
+            <input type="email" id="loginEmail" class="login-input" placeholder="Email">
             <input type="password" id="loginPass" class="login-input" placeholder="Password">
             <button class="login-btn" onclick="handleLogin()">Login Now</button>
             <span class="toggle-link" onclick="toggleAuth('register')">Create New Account</span>
@@ -64,7 +78,7 @@
         <div class="login-card" id="register-form" style="display:none;">
             <h2 style="color:var(--primary); margin-bottom:10px;">🆕 Sign Up</h2>
             <input type="text" id="regName" class="login-input" placeholder="Full Name">
-            <input type="email" id="regEmail" class="login-input" placeholder="Email Address">
+            <input type="email" id="regEmail" class="login-input" placeholder="Email">
             <input type="password" id="regPass" class="login-input" placeholder="Password (Min 6 chars)">
             <button class="login-btn" onclick="handleRegister()" style="background:#10b981;">Create Account</button>
             <span class="toggle-link" onclick="toggleAuth('login')">Back to Login</span>
@@ -96,7 +110,7 @@
                 <div id="feed-section" class="section active">
                     <div class="create-post">
                         <textarea id="postInput" rows="3" placeholder="Post something..."></textarea>
-                        <button onclick="addPost()" style="background:var(--primary); color:white; border:none; padding:8px 20px; border-radius:6px; float:right; cursor:pointer;">Post</button>
+                        <button onclick="addPost()" class="btn-post">Post</button>
                         <div style="clear:both;"></div>
                     </div>
                     <div id="feedStream">Loading...</div>
@@ -104,31 +118,55 @@
 
                 <div id="generator-section" class="section">
                     <div class="gen-card">
-                        <h2 style="margin-top:0; color:var(--primary);">✨ AI Content Studio</h2>
-                        <input type="text" id="topic" placeholder="Topic (e.g. Eyewear)">
+                        <h2 style="margin-top:0; color:var(--primary);">✨ AI Content Studio (v2.5)</h2>
+                        <label>Topic (ခေါင်းစဉ်)</label>
+                        <input type="text" id="topic" placeholder="e.g. Eyewear Promotion...">
+                        
                         <div class="input-grid">
-                            <select id="contentType"><option>Brand Awareness</option><option>Engagement</option><option>Sales</option></select>
-                            <select id="platform"><option>Facebook</option><option>TikTok</option></select>
+                            <div>
+                                <label>Content Type</label>
+                                <select id="contentType">
+                                    <option value="Brand Awareness">Brand Awareness</option>
+                                    <option value="Engagement">Engagement / Question</option>
+                                    <option value="Knowledge Sharing">Knowledge Sharing</option>
+                                    <option value="Copywriting / Sales">Copywriting / Sales</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label>Platform</label>
+                                <select id="platform"><option value="Facebook">Facebook</option><option value="TikTok">TikTok</option><option value="Telegram">Telegram</option><option value="YouTube">YouTube</option></select>
+                            </div>
                         </div>
+
                         <div class="input-grid">
-                            <input type="text" id="target" placeholder="Target Audience">
-                            <select id="tone"><option>Professional</option><option>Funny</option><option>Emotional</option></select>
+                            <div><label>Target Audience</label><input type="text" id="target" placeholder="e.g. Students, Parents"></div>
+                            <div>
+                                <label>Tone (လေသံ)</label>
+                                <select id="tone"><option value="Professional">Professional</option><option value="Funny & Witty">Funny & Witty</option><option value="Emotional">Emotional Story</option><option value="Urgent / Sales">Urgent / Hard Sell</option></select>
+                            </div>
                         </div>
+
                         <div class="input-grid">
-                            <select id="creativity"><option>Standard</option><option>High</option></select>
-                            <select id="length"><option>Medium</option><option>Short</option></select>
+                            <div><label>Creativity</label><select id="creativity"><option value="Standard">Standard</option><option value="High">High</option><option value="Max">Max</option></select></div>
+                            <div><label>Length</label><select id="length"><option value="Medium">Medium</option><option value="Short">Short</option><option value="Long">Long</option></select></div>
                         </div>
+
                         <button class="btn-gen" id="genBtn" onclick="generateContent()">✨ Generate</button>
-                        <div id="output" style="background:#f9fafb; padding:15px; margin-top:15px; border:1px solid #ddd; min-height:100px; white-space: pre-wrap;"></div>
+                        <div id="output" class="result-box" style="background:#f8f9fa; padding:15px; margin-top:15px; border:1px solid #ddd; border-radius:8px; white-space: pre-wrap; min-height:80px;"></div>
                         <button class="btn-gen" style="background:#10b981; display:none;" id="useBtn" onclick="sendToFeed()">📝 Send to Feed</button>
                     </div>
                 </div>
 
                 <div id="courses-section" class="section">
                     <div id="course-list-view">
-                        <h2>🎓 My Learning</h2>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h2>🎓 My Learning</h2>
+                            <span id="adminBadge" style="background:red; color:white; padding:2px 8px; border-radius:4px; font-size:10px; display:none;">ADMIN MODE</span>
+                        </div>
                         <div class="course-grid" id="courseGrid">
-                            <div class="course-card add-course-card" onclick="toggleAddCourseForm()"><i class="fas fa-plus-circle" style="font-size:30px; margin-bottom:10px;"></i><b>Add New Course</b></div>
+                            <div class="course-card" onclick="openDefaultCourse('webdev')"><div class="course-thumb" style="background:#3b82f6;">💻</div><div class="course-info"><h3>Web Development</h3><p style="font-size:12px; color:gray;">HTML, CSS, JS Basics</p><span>5 Videos</span></div></div>
+                            <div class="course-card" onclick="openDefaultCourse('marketing')"><div class="course-thumb" style="background:#ec4899;">📈</div><div class="course-info"><h3>Digital Marketing</h3><p style="font-size:12px; color:gray;">Social Media & Ads</p><span>5 Videos</span></div></div>
+                            <div class="course-card add-course-card" id="adminAddCourseBtn" onclick="toggleAddCourseForm()"><i class="fas fa-plus-circle" style="font-size:30px; margin-bottom:10px;"></i><b>Add New Course</b></div>
                         </div>
                         <div id="add-course-form" style="display:none; margin-top:20px; background:#eef2ff; padding:20px; border-radius:10px;">
                             <h3>Create New Course</h3>
@@ -138,14 +176,15 @@
                             <button class="admin-btn" style="background:gray;" onclick="toggleAddCourseForm()">Cancel</button>
                         </div>
                     </div>
+
                     <div id="course-player-view" style="display:none;">
                         <button onclick="backToCourses()" style="margin-bottom:15px; border:none; background:none; color:var(--primary); font-weight:bold;">← Back</button>
-                        <div style="display:flex; justify-content:space-between;"><h2 id="playerTitle">Course</h2><button onclick="deleteCurrentCourse()" style="color:red; background:none; border:none; cursor:pointer;">Delete</button></div>
+                        <div style="display:flex; justify-content:space-between;"><h2 id="playerTitle">Course</h2><button id="deleteCourseBtn" onclick="deleteCurrentCourse()" style="color:red; background:none; border:none; cursor:pointer; display:none;">Delete</button></div>
                         <div class="video-layout">
                             <div>
                                 <iframe id="mainVideo" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
-                                <div class="admin-box">
-                                    <h4><i class="fas fa-plus"></i> Add Video</h4>
+                                <div class="admin-box" id="adminVideoBox">
+                                    <h4><i class="fas fa-plus"></i> Add Video (Admin)</h4>
                                     <input type="text" id="newVideoTitle" placeholder="Title" style="width:100%; margin-bottom:5px;">
                                     <div style="display:flex;"><input type="text" id="newVideoLink" class="admin-input" placeholder="YouTube Link..."><button class="admin-btn" onclick="addVideoToCourse()">Add</button></div>
                                 </div>
@@ -158,10 +197,8 @@
                 <div id="settings-section" class="section">
                     <h2>⚙️ Settings</h2>
                     <div class="settings-group">
-                        <div class="profile-pic-large" onclick="document.getElementById('profileInput').click()">
-                            <img id="settingUserPic" src="" style="display:none;">
-                            <span id="settingUserInitial">U</span>
-                        </div>
+                        <div class="profile-pic-large" onclick="triggerFileInput()"><img id="settingUserPic" src="" style="display:none;"><span id="settingUserInitial">U</span></div>
+                        <p style="text-align:center; font-size:12px; color:gray;">Click to change (Max 500KB)</p>
                         <input type="file" id="profileInput" accept="image/*" style="display:none" onchange="updateProfilePic(this)">
                         <label>Name</label><input type="text" id="settingName" readonly style="background:#eee;">
                         <label>Email</label><input type="text" id="settingEmail" readonly style="background:#eee;">
@@ -189,16 +226,18 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // 🔐 CONFIGURATION
         const ENCODED_KEY = "QUl6YVN5Q1Z6YUEyQlJGYndfbmcxVmpRWldYNU55TlAtZlItYURR"; 
-        const MODEL_NAME = "gemini-2.5-flash";
+        const MODEL_NAME = "gemini-2.5-flash"; // ✅ CHANGED TO 2.5 AS REQUESTED
+        const ADMIN_EMAIL = "admin@myclass.com"; // 🔐 ADMIN EMAIL
+
         let currentCourseId = null;
+        let isDefaultCourse = false;
+        let isAdmin = false;
 
-        // --- AUTH (NO VERIFICATION CHECK) ---
-        window.toggleAuth = (v) => {
-            document.getElementById('login-form').style.display = v==='login'?'block':'none';
-            document.getElementById('register-form').style.display = v==='register'?'block':'none';
-        }
-
+        // --- AUTH ---
+        window.toggleAuth = (v) => { document.getElementById('login-form').style.display = v==='login'?'block':'none'; document.getElementById('register-form').style.display = v==='register'?'block':'none'; }
+        
         window.handleRegister = async () => {
             const email = document.getElementById('regEmail').value;
             const pass = document.getElementById('regPass').value;
@@ -207,29 +246,37 @@
             try {
                 const uc = await createUserWithEmailAndPassword(auth, email, pass);
                 await updateProfile(uc.user, { displayName: name });
-                // Create DB entry for profile pic
                 await addDoc(collection(db, "users"), { uid: uc.user.uid, name: name, email: email, profilePic: null });
-                alert("✅ Account Created! Logging in...");
+                alert("✅ Account Created!");
             } catch(e) { alert("Error: "+e.message); }
         }
-
         window.handleLogin = async () => {
-            const email = document.getElementById('loginEmail').value;
-            const pass = document.getElementById('loginPass').value;
-            try { await signInWithEmailAndPassword(auth, email, pass); } 
+            try { await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); } 
             catch(e) { alert("Login Failed: "+e.message); }
         }
-
         window.logoutUser = () => signOut(auth);
 
+        // --- AUTH STATE & ADMIN CHECK ---
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
+                
+                // User Info
                 document.getElementById('navUserName').innerText = user.displayName || "User";
                 document.getElementById('settingName').value = user.displayName || "";
                 document.getElementById('settingEmail').value = user.email || "";
-                
+
+                // CHECK IF ADMIN
+                isAdmin = (user.email === ADMIN_EMAIL);
+                if(isAdmin) {
+                    document.getElementById('adminBadge').style.display = 'block';
+                    document.getElementById('adminAddCourseBtn').style.display = 'flex'; // Show Add Button
+                } else {
+                    document.getElementById('adminBadge').style.display = 'none';
+                    document.getElementById('adminAddCourseBtn').style.display = 'none'; // Hide Add Button
+                }
+
                 // Load Profile Pic
                 const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
                 const snap = await getDocs(q);
@@ -250,8 +297,10 @@
             }
         });
 
+        window.triggerFileInput = () => document.getElementById('profileInput').click();
         window.updateProfilePic = (input) => {
             const file = input.files[0]; if(!file) return;
+            if(file.size > 500000) { alert("Image too large! < 500KB"); return; }
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const base64 = e.target.result;
@@ -262,7 +311,9 @@
                     if(!snap.empty) {
                         await updateDoc(doc(db, "users", snap.docs[0].id), { profilePic: base64 });
                         document.getElementById('navUserPic').src = base64;
+                        document.getElementById('navUserPic').style.display = 'block';
                         document.getElementById('settingUserPic').src = base64;
+                        document.getElementById('settingUserPic').style.display = 'block';
                         alert("Profile Updated!");
                     }
                 }
@@ -270,38 +321,29 @@
             reader.readAsDataURL(file);
         }
 
-        // --- GENERATOR & APP LOGIC ---
+        // --- GENERATOR ---
         window.generateContent = async function() {
             const topic = document.getElementById('topic').value;
-            const btn = document.getElementById('genBtn');
             const output = document.getElementById('output');
+            const btn = document.getElementById('genBtn');
             if(!topic) return;
             
             let REAL_KEY = ""; try { REAL_KEY = atob(ENCODED_KEY); } catch(e) { return; }
             btn.innerText = "Thinking...";
             
-            const prompt = `Act as a Social Media Manager. Write a ${document.getElementById('length').value} post for ${document.getElementById('platform').value}. Type: ${document.getElementById('contentType').value}. Topic: "${topic}". Tone: ${document.getElementById('tone').value}. Language: Burmese.`;
+            const prompt = `Act as a Social Media Manager. Write a ${document.getElementById('length').value} post for ${document.getElementById('platform').value}. Type: ${document.getElementById('contentType').value}. Topic: "${topic}". Audience: ${document.getElementById('target').value}. Tone: ${document.getElementById('tone').value}. Creativity: ${document.getElementById('creativity').value}. Language: Burmese.`;
             
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${REAL_KEY}`, {
                     method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}]})
                 });
                 const d = await res.json();
-                if(!res.ok) output.innerText = "API Error: " + (d.error?.message || "Unknown");
-                else {
-                    output.innerText = d.candidates[0].content.parts[0].text;
-                    document.getElementById('useBtn').style.display = 'block';
-                }
+                if(!res.ok) output.innerText = "Error: " + (d.error?.message || "Unknown");
+                else { output.innerText = d.candidates[0].content.parts[0].text; document.getElementById('useBtn').style.display = 'block'; }
             } catch(e) { output.innerText = "Net Error"; }
             btn.innerText = "✨ Generate";
         }
 
-        window.switchTab = (t) => {
-            document.querySelectorAll('.section').forEach(e=>e.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(e=>e.classList.remove('active'));
-            document.getElementById(t+'-section').classList.add('active');
-            document.getElementById('nav-'+(t==='generator'?'gen':t)).classList.add('active');
-        }
         window.sendToFeed = () => { window.switchTab('feed'); document.getElementById('postInput').value = document.getElementById('output').innerText; }
         window.addPost = async () => {
             const txt = document.getElementById('postInput').value; if(!txt) return;
@@ -310,47 +352,70 @@
         }
         onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (s)=>{
             const f = document.getElementById('feedStream'); f.innerHTML = "";
-            s.forEach(d => f.innerHTML += `<div class="post"><div class="post-header"><div class="avatar">${d.data().username.charAt(0)}</div><b>${d.data().username}</b></div><div style="white-space:pre-wrap;">${d.data().content}</div></div>`);
+            s.forEach(d => f.innerHTML += `<div class="post"><b>${d.data().username}</b><br><div style="white-space:pre-wrap;">${d.data().content}</div></div>`);
         });
 
-        // --- COURSE LOGIC ---
+        // --- COURSES ---
+        const defaultCourses = {
+            'webdev': { title: "Web Development", videos: [ {title:"HTML", id:"ok-plXXHlWw"}, {title:"CSS", id:"1Rs2ND1ryYc"}, {title:"JS", id:"hdI2bqOjy3c"} ] },
+            'marketing': { title: "Digital Marketing", videos: [ {title:"Marketing 101", id:"bixR-KIJKYM"}, {title:"Strategy", id:"U5i80B0O_h4"} ] }
+        };
+
+        window.openDefaultCourse = (key) => {
+            isDefaultCourse = true;
+            document.getElementById('deleteCourseBtn').style.display = 'none';
+            document.getElementById('adminVideoBox').style.display = 'none';
+            openPlayer(defaultCourses[key].title, defaultCourses[key].videos);
+        }
+
         onSnapshot(collection(db, "courses"), (s) => {
             const g = document.getElementById('courseGrid'); 
-            // Keep add button
-            const addBtn = g.querySelector('.add-course-card');
-            g.innerHTML = "";
+            const addBtn = document.getElementById('adminAddCourseBtn');
+            // Clear dynamic items
+            g.querySelectorAll('.dynamic-course').forEach(e => e.remove());
+
             s.forEach(d => {
                 const c=d.data();
                 const div = document.createElement('div');
-                div.className = "course-card";
+                div.className = "course-card dynamic-course";
                 div.innerHTML = `<div class="course-thumb">📘</div><div class="course-info"><h3>${c.title}</h3><span>${c.videos?c.videos.length:0} Videos</span></div>`;
-                div.onclick = () => openCourse(d.id, c);
-                g.appendChild(div);
+                div.onclick = () => openAdminCourse(d.id, c);
+                // Insert before the add button
+                if(addBtn) g.insertBefore(div, addBtn);
+                else g.appendChild(div);
             });
-            if(addBtn) g.appendChild(addBtn); else g.innerHTML += `<div class="course-card add-course-card" onclick="toggleAddCourseForm()"><i class="fas fa-plus-circle" style="font-size:30px; margin-bottom:10px;"></i><b>Add New Course</b></div>`;
         });
+
+        window.openAdminCourse = (id, data) => {
+            isDefaultCourse = false;
+            currentCourseId = id;
+            
+            // Show Admin Controls ONLY if user is admin
+            if(isAdmin) {
+                document.getElementById('deleteCourseBtn').style.display = 'block';
+                document.getElementById('adminVideoBox').style.display = 'block';
+            } else {
+                document.getElementById('deleteCourseBtn').style.display = 'none';
+                document.getElementById('adminVideoBox').style.display = 'none';
+            }
+            openPlayer(data.title, data.videos || []);
+        }
+
+        function openPlayer(title, videos) {
+            document.getElementById('course-list-view').style.display='none';
+            document.getElementById('course-player-view').style.display='block';
+            document.getElementById('playerTitle').innerText = title;
+            const list = document.getElementById('lessonList'); list.innerHTML = "";
+            videos.forEach(v => {
+                list.innerHTML += `<div class="lesson-item" onclick="document.getElementById('mainVideo').src='https://www.youtube.com/embed/${v.id}'">▶️ ${v.title}</div>`;
+            });
+        }
+
         window.toggleAddCourseForm = () => { const f = document.getElementById('add-course-form'); f.style.display = f.style.display==='none'?'block':'none'; }
         window.createNewCourse = async () => {
             const t = document.getElementById('newCourseTitle').value; if(!t) return;
-            await addDoc(collection(db, "courses"), { title: t, description: document.getElementById('newCourseDesc').value, videos: [] });
+            await addDoc(collection(db, "courses"), { title: t, description: "", videos: [] });
             window.toggleAddCourseForm();
-        }
-        window.openCourse = (id, data) => {
-            currentCourseId = id;
-            document.getElementById('course-list-view').style.display='none';
-            document.getElementById('course-player-view').style.display='block';
-            document.getElementById('playerTitle').innerText = data.title;
-            renderVideoList(data.videos || []);
-        }
-        function renderVideoList(videos) {
-            const list = document.getElementById('lessonList'); list.innerHTML = "";
-            if(videos.length === 0) list.innerHTML = "<div style='padding:20px;text-align:center;'>No videos.</div>";
-            videos.forEach((v) => {
-                const item = document.createElement('div'); item.className = "lesson-item";
-                item.innerHTML = `<span>▶️</span> <span>${v.title}</span>`;
-                item.onclick = () => { document.getElementById('mainVideo').src = "https://www.youtube.com/embed/" + v.id; };
-                list.appendChild(item);
-            });
         }
         window.addVideoToCourse = async () => {
             const t = document.getElementById('newVideoTitle').value;
@@ -363,8 +428,17 @@
             await updateDoc(doc(db, "courses", currentCourseId), { videos: arrayUnion({ title: t, id: vidId }) });
             alert("Added!");
         }
-        window.deleteCurrentCourse = async () => { if(confirm("Delete?")) { await deleteDoc(doc(db, "courses", currentCourseId)); window.backToCourses(); } }
+        window.deleteCurrentCourse = async () => { 
+            if(isDefaultCourse || !isAdmin) return;
+            if(confirm("Delete?")) { await deleteDoc(doc(db, "courses", currentCourseId)); window.backToCourses(); } 
+        }
         window.backToCourses = () => { document.getElementById('course-player-view').style.display='none'; document.getElementById('course-list-view').style.display='block'; document.getElementById('mainVideo').src=""; }
+        window.switchTab = (t) => {
+            document.querySelectorAll('.section').forEach(e=>e.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(e=>e.classList.remove('active'));
+            document.getElementById(t+'-section').classList.add('active');
+            document.getElementById('nav-'+(t==='generator'?'gen':t)).classList.add('active');
+        }
     </script>
 </body>
 </html>
