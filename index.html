@@ -3,159 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creative AI Content</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Padauk:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <title>My Class Feed & Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', 'Padauk', sans-serif; background: #f3f4f6; }
-        .preview-card { background: white; border-radius: 12px; border: 1px solid #e5e7eb; overflow: hidden; }
-        .loader { width: 18px; height: 18px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* Custom Button Select Styles */
-        .btn-select { cursor: pointer; transition: all 0.2s; border: 1px solid #e5e7eb; }
-        .btn-select.active { background: #2563eb; color: white; border-color: #2563eb; }
+        :root { --primary: #6366f1; --bg-body: #f3f4f6; --bg-card: #ffffff; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); margin: 0; padding: 20px; }
+        
+        /* Container Setup */
+        .container { max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+        
+        /* Card Styles */
+        .card { background: var(--bg-card); padding: 20px; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        h2 { margin-top: 0; font-size: 18px; color: #333; display: flex; align-items: center; gap: 10px; }
+        
+        /* Inputs & Buttons */
+        input, select, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+        .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Generated Output */
+        .result-box { background: #f8f9fa; border: 1px dashed #ccc; padding: 15px; border-radius: 8px; margin-top: 15px; min-height: 80px; white-space: pre-wrap; font-size: 14px; }
+        
+        /* Feed Post */
+        .post { background: white; padding: 20px; border-radius: 15px; margin-bottom: 15px; border: 1px solid #eee; }
+        .post-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .avatar { width: 40px; height: 40px; background: #e0e7ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .timestamp { font-size: 12px; color: gray; }
+
+        @media (max-width: 768px) { .container { grid-template-columns: 1fr; } }
     </style>
 </head>
-<body class="min-h-screen p-4 flex justify-center">
+<body>
 
-    {% if show_login %}
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md self-center">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">🔒 Login</h2>
-        {% if error %}<p class="text-red-500 text-center mb-4 text-sm">{{ error }}</p>{% endif %}
-        <form method="POST">
-            <input type="password" name="password" placeholder="Password..." required class="w-full p-3 border rounded-lg mb-4 outline-none focus:border-blue-500">
-            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition">Log In</button>
-        </form>
-    </div>
-    {% else %}
-    
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-7xl">
-        <div class="lg:col-span-5 bg-white p-6 rounded-xl shadow-sm h-fit">
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-xl font-bold text-blue-600"><i class="fas fa-brain mr-2"></i>Creative AI</h1>
-                <a href="/logout" class="text-gray-400 hover:text-red-500"><i class="fas fa-power-off"></i></a>
-            </div>
-            <div class="space-y-4">
-                
-                <input type="text" id="topic" placeholder="What to write about?" class="w-full p-3 border rounded-lg bg-gray-50 focus:bg-white outline-none focus:ring-2 focus:ring-blue-500 font-medium">
-
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="ai_model" class="p-2 border rounded-lg text-sm bg-blue-50 font-bold text-blue-700"><option>Gemini 2.5 Flash</option><option>Gemini 3.0 Pro</option><option>DeepSeek</option><option>ChatGPT</option></select>
-                    <select id="language" class="p-2 border rounded-lg text-sm bg-blue-50 font-bold text-blue-700"><option>Myanglish</option><option>Pure Burmese</option><option>English Only</option></select>
-                </div>
-
-                <div class="bg-gray-50 p-3 rounded-lg border">
-                    <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">Creativity Level</label>
-                    <select id="creativity" class="w-full p-2 border rounded text-sm mb-3 font-medium">
-                        <option value="Standard">Standard (ရိုးရိုး)</option>
-                        <option value="Storytelling">Storytelling (ဇာတ်လမ်းဆင်)</option>
-                        <option value="Viral/Hook">Viral Hook (ပေါက်အောင်ရေး)</option>
-                        <option value="Direct/Sales">Direct Sales (ရောင်းစကား)</option>
-                    </select>
-
-                    <label class="text-xs font-bold text-gray-500 uppercase mb-1 block">Length</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div onclick="setLength('Short')" id="lenShort" class="btn-select p-2 rounded text-center text-xs font-bold text-gray-600 bg-white">Short</div>
-                        <div onclick="setLength('Medium')" id="lenMedium" class="btn-select active p-2 rounded text-center text-xs font-bold text-gray-600 bg-white">Medium</div>
-                        <div onclick="setLength('Long')" id="lenLong" class="btn-select p-2 rounded text-center text-xs font-bold text-gray-600 bg-white">Long</div>
-                    </div>
-                    <input type="hidden" id="length" value="Medium">
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="platform" class="p-2 border rounded text-sm bg-gray-50" onchange="renderPreview()"><option>Facebook</option><option>Instagram</option><option>LinkedIn</option><option>TikTok</option></select>
-                    <select id="tone" class="p-2 border rounded text-sm bg-gray-50"><option>Professional</option><option>Funny</option><option>Emotional</option></select>
-                </div>
-
-                <button onclick="generate()" id="genBtn" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 rounded-lg shadow hover:shadow-lg flex justify-center items-center gap-2">Generate Magic</button>
-                
-                <div class="mt-4 pt-4 border-t">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-2">History</h3>
-                    <div id="historyList" class="space-y-2 max-h-32 overflow-y-auto text-sm text-gray-600"><p class="text-xs italic text-gray-400">Empty</p></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="lg:col-span-7 bg-white p-6 rounded-xl shadow-sm min-h-[600px] flex flex-col">
-            <h3 class="text-sm font-bold text-gray-400 uppercase mb-4">Live Preview</h3>
-            <div id="previewContainer" class="flex-grow">
-                <div class="flex flex-col items-center justify-center h-64 text-gray-300"><i class="fas fa-mobile-alt text-5xl mb-2"></i><p>Result will appear here</p></div>
-            </div>
-            <div id="magicButtons" class="hidden mt-4 pt-4 border-t flex flex-wrap gap-2">
-                <button onclick="refine('Shorten it')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">✂️ Shorten</button>
-                <button onclick="refine('Add emojis')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">😍 Emojis</button>
-                <button onclick="refine('Make it more engaging')" class="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-bold hover:bg-purple-100">🔥 Spicy</button>
-                <button onclick="copyText()" class="ml-auto bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-blue-100">Copy</button>
-            </div>
-            <textarea id="rawText" class="hidden"></textarea>
-        </div>
-    </div>
-
-    <script>
-        window.onload = loadHistory;
+    <div class="container">
         
-        function setLength(val) {
-            document.getElementById('length').value = val;
-            ['lenShort', 'lenMedium', 'lenLong'].forEach(id => document.getElementById(id).classList.remove('active'));
-            document.getElementById('len' + val).classList.add('active');
+        <div class="left-panel">
+            <div class="card">
+                <h2>✨ AI Content Generator</h2>
+                <label style="font-size:12px; font-weight:bold;">What to write about?</label>
+                <input type="text" id="topic" placeholder="e.g. 50% Discount on Eyewear...">
+                
+                <label style="font-size:12px; font-weight:bold;">Tone</label>
+                <select id="tone">
+                    <option value="Professional">👔 Professional</option>
+                    <option value="Fun & Engaging">😂 Fun & Engaging</option>
+                    <option value="Emotional">❤️ Emotional</option>
+                    <option value="Sales">💰 Sales / Hard Sell</option>
+                </select>
+
+                <button class="btn" id="genBtn" onclick="generateContent()">Generate Magic 🪄</button>
+                
+                <div class="result-box" id="output">Result will appear here...</div>
+                <button class="btn" style="background:#10b981; margin-top:10px; display:none;" id="useBtn" onclick="sendToFeed()">Use in Post</button>
+            </div>
+            
+            <div class="card">
+                <h2>⚙️ Settings</h2>
+                <input type="password" id="apiKeyInput" placeholder="Paste Gemini API Key here">
+                <button class="btn" style="background:#4b5563;" onclick="saveKey()">Save Key</button>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="card">
+                <h2>📝 Create Post</h2>
+                <textarea id="postInput" rows="4" placeholder="What's on your mind?"></textarea>
+                <button class="btn" onclick="addPost()">Post to Feed</button>
+            </div>
+
+            <div id="feedStream">
+                <div style="text-align:center; color:gray; padding:20px;">Loading Feed...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } 
+        from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // --- 1. FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyAFLolC6hEYro24FAFrKTGrXe4WXvISv3M", // Firebase Key Only
+            authDomain: "myclassfeed-766f9.firebaseapp.com",
+            projectId: "myclassfeed-766f9",
+            storageBucket: "myclassfeed-766f9.firebasestorage.app",
+            messagingSenderId: "428491793200",
+            appId: "1:428491793200:web:dc8b769278b0e981d29ef5"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- 2. GLOBAL VARIABLES ---
+        // ⚠️ ဒီနေရာမှာ မင်းရဲ့ GEMINI Key ကို အသေထည့်ထားလို့ရပါတယ်
+        let geminiKey = localStorage.getItem("GEMINI_KEY") || "AIzaSy...မင်းရဲ့Key..."; 
+
+        // --- 3. GENERATOR FUNCTION ---
+        window.generateContent = async function() {
+            const topic = document.getElementById('topic').value;
+            const tone = document.getElementById('tone').value;
+            const btn = document.getElementById('genBtn');
+            const output = document.getElementById('output');
+
+            if(!topic) { alert("Please enter a topic!"); return; }
+            if(!geminiKey || geminiKey.length < 10) { alert("Please enter API Key in Settings first!"); return; }
+
+            btn.disabled = true;
+            btn.innerText = "Thinking...";
+            output.innerText = "AI is writing...";
+
+            const prompt = `Write a Facebook post in Burmese regarding: "${topic}". Tone: ${tone}. Use emojis.`;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await response.json();
+                const text = data.candidates[0].content.parts[0].text;
+                
+                output.innerText = text;
+                document.getElementById('useBtn').style.display = 'block';
+            } catch (e) {
+                output.innerText = "Error! Please check API Key.";
+                console.error(e);
+            }
+            btn.disabled = false;
+            btn.innerText = "Generate Magic 🪄";
         }
 
-        async function generate(refineInstr = null) {
-            const data = {
-                topic: document.getElementById('topic').value,
-                platform: document.getElementById('platform').value,
-                tone: document.getElementById('tone').value,
-                length: document.getElementById('length').value,
-                creativity: document.getElementById('creativity').value, // New
-                language: document.getElementById('language').value,
-                ai_model: document.getElementById('ai_model').value,
-                refine_instruction: refineInstr,
-                current_text: document.getElementById('rawText').value
-            };
-            if(!data.topic && !refineInstr) return alert("Please enter a topic!");
-            const btn = document.getElementById('genBtn');
-            btn.innerHTML = '<div class="loader"></div>'; btn.disabled = true;
-            try {
-                const res = await fetch('/generate', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
-                const json = await res.json();
-                const content = json.post_content || "Error.";
-                document.getElementById('rawText').value = content;
-                renderPreview(content);
-                document.getElementById('magicButtons').classList.remove('hidden');
-                if(!refineInstr) saveHistory(data.topic, content);
-            } catch (e) { alert("Error: " + e); } 
-            finally { btn.innerHTML = 'Generate Magic'; btn.disabled = false; }
+        window.sendToFeed = function() {
+            document.getElementById('postInput').value = document.getElementById('output').innerText;
         }
-        function refine(instr) { generate(instr); }
-        function renderPreview(text = null) {
-            const content = text || document.getElementById('rawText').value;
-            const platform = document.getElementById('platform').value;
-            const html = content.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
-            const container = document.getElementById('previewContainer');
-            if(platform === 'Facebook') container.innerHTML = `<div class="preview-card p-4"><div class="flex items-center mb-3"><div class="w-10 h-10 bg-gray-300 rounded-full"></div><div class="ml-3"><div class="font-bold text-sm">Page Name</div><div class="text-xs text-gray-500">Just now</div></div></div><div class="text-sm text-gray-900">${html}</div></div>`;
-            else if(platform === 'Instagram') container.innerHTML = `<div class="preview-card max-w-sm mx-auto"><div class="p-2 flex items-center gap-2 border-b"><div class="w-8 h-8 bg-gray-300 rounded-full"></div><span class="font-bold text-sm">username</span></div><div class="h-64 bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image text-3xl"></i></div><div class="p-3 text-sm"><span class="font-bold mr-2">username</span>${html}</div></div>`;
-            else container.innerHTML = `<div class="preview-card p-4 text-sm">${html}</div>`;
+
+        window.saveKey = function() {
+            const key = document.getElementById('apiKeyInput').value;
+            localStorage.setItem("GEMINI_KEY", key);
+            geminiKey = key;
+            alert("API Key Saved!");
         }
-        function saveHistory(t, c) {
-            let h = JSON.parse(localStorage.getItem('aiH')) || [];
-            h.unshift({t, c, d: new Date().toLocaleTimeString()});
-            if(h.length>10) h.pop();
-            localStorage.setItem('aiH', JSON.stringify(h));
-            loadHistory();
+
+        // --- 4. FEED FUNCTIONS ---
+        window.addPost = async function() {
+            const txt = document.getElementById('postInput').value;
+            if(!txt) return;
+            await addDoc(collection(db, "posts"), {
+                content: txt,
+                username: "MyUser",
+                timestamp: serverTimestamp()
+            });
+            document.getElementById('postInput').value = "";
         }
-        function loadHistory() {
-            const h = JSON.parse(localStorage.getItem('aiH')) || [];
-            document.getElementById('historyList').innerHTML = h.length ? h.map((i,x) => `<div onclick="restore(${x})" class="cursor-pointer p-2 hover:bg-blue-50 rounded border border-gray-100 truncate text-xs font-bold text-blue-600">${i.t}</div>`).join('') : '<p class="text-xs italic text-gray-400">Empty</p>';
-        }
-        function restore(x) {
-            const item = JSON.parse(localStorage.getItem('aiH'))[x];
-            document.getElementById('rawText').value = item.c;
-            renderPreview(item.c);
-            document.getElementById('magicButtons').classList.remove('hidden');
-        }
-        function copyText() { navigator.clipboard.writeText(document.getElementById('rawText').value); alert("Copied!"); }
+
+        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            const feedDiv = document.getElementById('feedStream');
+            feedDiv.innerHTML = "";
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                feedDiv.innerHTML += `
+                <div class="post">
+                    <div class="post-header">
+                        <div class="avatar">U</div>
+                        <div>
+                            <div style="font-weight:bold;">User</div>
+                            <div class="timestamp">Just now</div>
+                        </div>
+                    </div>
+                    <div>${data.content.replace(/\n/g, "<br>")}</div>
+                </div>`;
+            });
+        });
     </script>
-    {% endif %}
 </body>
 </html>
