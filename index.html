@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Class (Full Control)</title>
+    <title>My Class (SMS Fixed)</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root { --primary: #6366f1; --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1f2937; --border: #e5e7eb; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); margin: 0; color: var(--text-main); }
         
-        /* AUTH UI */
+        /* LOGIN OVERLAY */
         #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #eef2ff; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .login-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 360px; text-align: center; }
         .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .login-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .login-btn:disabled { background: #ccc; cursor: not-allowed; }
         .toggle-link { margin-top: 15px; font-size: 13px; color: var(--primary); cursor: pointer; text-decoration: underline; display: block; }
         
         /* APP UI */
@@ -29,30 +30,23 @@
         /* COMPONENTS */
         .card, .gen-card, .create-post, .post, .settings-group { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        label { display:block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #4b5563; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; background: #fff; margin-bottom: 10px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
         .btn-gen { width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-
+        
         /* COURSES */
         .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .course-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
-        .course-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .course-thumb { height: 140px; background: #e0e7ff; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--primary); }
         .course-info { padding: 15px; }
         .add-course-card { border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; flex-direction: column; color: gray; min-height: 200px; cursor: pointer; display: none; } 
-        
-        /* PLAYER & ADMIN CONTROLS */
         .video-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
         .video-player { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; margin-bottom: 15px; }
         .lesson-list { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 10px; max-height: 500px; overflow-y: auto; }
-        .lesson-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .lesson-item:hover { background: #f9fafb; }
-        .lesson-title { display: flex; align-items: center; gap: 10px; }
+        .lesson-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; gap: 10px; align-items: center; }
         
+        /* ADMIN & PROFILE */
         .admin-box { background: #f0fdf4; border: 1px dashed #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; }
-        .admin-btn { padding: 8px 15px; background: #22c55e; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight:bold; }
-        .delete-video-btn { color: red; font-size: 12px; cursor: pointer; padding: 5px; display: none; }
-        
+        .admin-btn { padding: 8px 15px; background: #22c55e; color: white; border: none; border-radius: 5px; cursor: pointer; }
         .btn-post { background: var(--primary); color: white; padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; float: right; font-weight: bold;}
         .profile-pic-large { width: 100px; height: 100px; border-radius: 50%; background: #eee; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid var(--primary); cursor: pointer; }
         .profile-pic-large img { width: 100%; height: 100%; object-fit: cover; }
@@ -63,29 +57,35 @@
 <body>
 
     <div id="login-overlay">
+        
         <div class="login-card" id="login-form">
             <h2 style="color:var(--primary);">🚀 Login</h2>
             <input type="text" id="loginInput" class="login-input" placeholder="Email or Phone (+66...)" oninput="detectInputType(this, 'loginPass')">
-            <input type="password" id="loginPass" class="login-input hidden" style="display:none;" placeholder="Password">
-            <div id="recaptcha-container-login"></div>
+            <input type="password" id="loginPass" class="login-input" style="display:none;" placeholder="Password">
+            
+            <div id="recaptcha-container" style="margin-bottom:15px; display:flex; justify-content:center;"></div>
+            
             <button class="login-btn" id="loginBtn" onclick="handleLogin()">Continue</button>
             <span class="toggle-link" onclick="toggleAuth('register')">Create New Account</span>
         </div>
+
         <div class="login-card" id="register-form" style="display:none;">
             <h2 style="color:var(--primary);">🆕 Sign Up</h2>
             <input type="text" id="regName" class="login-input" placeholder="Full Name">
             <input type="text" id="regInput" class="login-input" placeholder="Email or Phone (+66...)" oninput="detectInputType(this, 'regPass')">
-            <input type="password" id="regPass" class="login-input hidden" style="display:none;" placeholder="Password (Min 6 chars)">
-            <div id="recaptcha-container-reg"></div>
+            <input type="password" id="regPass" class="login-input" style="display:none;" placeholder="Password">
             <button class="login-btn" id="regBtn" onclick="handleRegister()">Sign Up</button>
             <span class="toggle-link" onclick="toggleAuth('login')">Back to Login</span>
         </div>
+
         <div class="login-card" id="otp-form" style="display:none;">
             <h2 style="color:var(--primary);">🔒 Verify OTP</h2>
-            <input type="text" id="otpCode" class="login-input" placeholder="Enter Code" style="text-align:center; letter-spacing:5px;">
-            <button class="login-btn" onclick="verifyOTP()">Verify</button>
-            <p onclick="location.reload()" style="font-size:12px; color:red; cursor:pointer; margin-top:10px;">Cancel</p>
+            <p style="color:gray; font-size:13px;">Code sent to your phone.</p>
+            <input type="text" id="otpCode" class="login-input" placeholder="123456" style="text-align:center; letter-spacing:5px;">
+            <button class="login-btn" onclick="verifyOTP()">Verify & Login</button>
+            <p onclick="location.reload()" style="font-size:12px; color:red; cursor:pointer; margin-top:15px;">Cancel / Try Again</p>
         </div>
+
     </div>
 
     <div id="app-content" style="display:none;">
@@ -116,7 +116,7 @@
                         <button onclick="addPost()" class="btn-post">Post</button>
                         <div style="clear:both;"></div>
                     </div>
-                    <div id="feedStream">Loading feed...</div>
+                    <div id="feedStream">Loading...</div>
                 </div>
 
                 <div id="generator-section" class="section">
@@ -134,52 +134,28 @@
 
                 <div id="courses-section" class="section">
                     <div id="course-list-view">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                            <h2>🎓 My Learning</h2>
-                            <span id="adminBadge" style="background:#fee2e2; color:#ef4444; padding:5px 10px; border-radius:20px; font-size:11px; font-weight:bold; display:none;">ADMIN</span>
-                        </div>
-                        
+                        <div style="display:flex; justify-content:space-between;"><h2>🎓 My Learning</h2><span id="adminBadge" style="display:none; color:red; font-weight:bold;">ADMIN</span></div>
                         <div class="course-grid" id="courseGrid">
-                            <div class="course-card add-course-card" id="adminAddCourseBtn" style="display:none;" onclick="toggleAddCourseForm()">
-                                <i class="fas fa-plus-circle" style="font-size:30px; margin-bottom:10px;"></i>
-                                <b>Add New Course</b>
-                            </div>
+                            <div class="course-card" onclick="openDefaultCourse('webdev')"><div class="course-thumb" style="background:#3b82f6;">💻</div><div class="course-info"><h3>Web Development</h3><span>5 Videos</span></div></div>
+                            <div class="course-card" onclick="openDefaultCourse('marketing')"><div class="course-thumb" style="background:#ec4899;">📈</div><div class="course-info"><h3>Digital Marketing</h3><span>5 Videos</span></div></div>
+                            <div class="course-card add-course-card" id="adminAddCourseBtn" onclick="toggleAddCourseForm()"><i class="fas fa-plus-circle" style="font-size:30px;"></i><b>Add New</b></div>
                         </div>
-
-                        <div id="add-course-form" style="display:none; margin-top:20px; background:#eef2ff; padding:20px; border-radius:10px;">
-                            <h3>Create New Course</h3>
-                            <input type="text" id="newCourseTitle" placeholder="Course Title">
-                            <input type="text" id="newCourseDesc" placeholder="Description">
-                            <button class="admin-btn" onclick="createNewCourse()">Create</button>
-                            <button class="admin-btn" style="background:gray;" onclick="toggleAddCourseForm()">Cancel</button>
+                        <div id="add-course-form" style="display:none; margin-top:20px; background:#eef2ff; padding:20px;">
+                            <input type="text" id="newCourseTitle" placeholder="Title"> <input type="text" id="newCourseDesc" placeholder="Desc">
+                            <button class="admin-btn" onclick="createNewCourse()">Create</button> <button class="admin-btn" style="background:gray;" onclick="toggleAddCourseForm()">Cancel</button>
                         </div>
                     </div>
-
                     <div id="course-player-view" style="display:none;">
-                        <button onclick="backToCourses()" style="margin-bottom:15px; border:none; background:none; color:var(--primary); font-weight:bold;">← Back</button>
-                        
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <h2 id="playerTitle" style="margin:0;">Course</h2>
-                            <div id="adminCourseControls" style="display:none;">
-                                <button onclick="editCourseTitle()" style="color:blue; background:none; border:none; cursor:pointer; margin-right:10px;">Edit</button>
-                                <button onclick="deleteCurrentCourse()" style="color:red; background:none; border:none; cursor:pointer;">Delete Course</button>
+                        <button onclick="backToCourses()" style="margin-bottom:10px; border:none; background:none; color:var(--primary);">← Back</button>
+                        <div style="display:flex; justify-content:space-between;"><h2 id="playerTitle">Course</h2><button id="deleteCourseBtn" onclick="deleteCurrentCourse()" style="display:none; color:red; background:none; border:none;">Delete</button></div>
+                        <div>
+                            <iframe id="mainVideo" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
+                            <div class="admin-box" id="adminVideoBox">
+                                <input type="text" id="newVideoTitle" placeholder="Title">
+                                <div style="display:flex;"><input type="text" id="newVideoLink" placeholder="Link" style="flex:1;"><button class="admin-btn" onclick="addVideoToCourse()">Add</button></div>
                             </div>
                         </div>
-                        
-                        <div class="video-layout">
-                            <div>
-                                <iframe id="mainVideo" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
-                                <div class="admin-box" id="adminVideoBox" style="display:none;">
-                                    <h4><i class="fas fa-plus"></i> Add Video</h4>
-                                    <input type="text" id="newVideoTitle" placeholder="Title" style="width:100%; margin-bottom:5px;">
-                                    <div style="display:flex; gap:5px;">
-                                        <input type="text" id="newVideoLink" class="admin-input" placeholder="YouTube Link" style="flex:1; margin-bottom:0;">
-                                        <button class="admin-btn" onclick="addVideoToCourse()">Add</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="lesson-list" id="lessonList"></div>
-                        </div>
+                        <div class="lesson-list" id="lessonList"></div>
                     </div>
                 </div>
 
@@ -191,8 +167,6 @@
                         <input type="file" id="profileInput" accept="image/*" style="display:none" onchange="updateProfilePic(this)">
                         <label>Contact</label><input type="text" id="settingContact" readonly style="background:#eee;">
                         <label>UID</label><input type="text" id="settingUid" readonly style="background:#eee; font-size:12px;">
-                        <br><br>
-                        <button onclick="seedDefaultCourses()" id="seedBtn" style="display:none; background:orange; color:white; border:none; padding:10px; border-radius:5px;">⚠️ Reset/Restore Default Courses</button>
                     </div>
                 </div>
             </main>
@@ -201,7 +175,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, arrayUnion, deleteDoc, getDocs, where, limit, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, arrayUnion, deleteDoc, getDocs, where, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
         import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
         from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
@@ -217,189 +191,151 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
+        // 🔐 KEYS
         const ENCODED_KEY = "QUl6YVN5Q1Z6YUEyQlJGYndfbmcxVmpRWldYNU55TlAtZlItYURR"; 
         const MODEL_NAME = "gemini-2.5-flash";
-        const ADMIN_PHONE = "+66810733351"; // 👑 Admin Phone
+        const ADMIN_PHONE = "+66810733351"; 
 
         let confirmationResult = null;
         let isAdmin = false;
         let currentCourseId = null;
-        let currentCourseData = null;
+        let isDefaultCourse = false;
+        let tempRegName = "";
 
         // --- AUTH LOGIC ---
-        window.toggleAuth = (v) => { document.getElementById('login-form').style.display = v==='login'?'block':'none'; document.getElementById('register-form').style.display = v==='register'?'block':'none'; document.getElementById('otp-form').style.display='none'; }
+        window.toggleAuth = (v) => { 
+            document.getElementById('login-form').style.display = v==='login'?'block':'none'; 
+            document.getElementById('register-form').style.display = v==='register'?'block':'none'; 
+            document.getElementById('otp-form').style.display='none';
+            // Clear old recaptcha
+            if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
+        }
+
         window.detectInputType = (i, p) => { document.getElementById(p).style.display = i.value.includes('@') ? 'block' : 'none'; }
 
-        const setupRecaptcha = (cid) => {
-            if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier=null; }
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, cid, {'size':'normal'});
+        // INIT RECAPTCHA (Only when needed)
+        const setupRecaptcha = () => {
+            if(!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'size': 'normal',
+                    'callback': () => console.log("Recaptcha Verified")
+                });
+                window.recaptchaVerifier.render();
+            }
         }
 
         window.handleLogin = async () => {
-            const i = document.getElementById('loginInput').value.trim(); const p = document.getElementById('loginPass').value;
+            const i = document.getElementById('loginInput').value.trim();
+            const p = document.getElementById('loginPass').value;
             const btn = document.getElementById('loginBtn');
+
             if(i.includes('@')) {
                 if(!p) { alert("Password needed"); return; }
                 try { await signInWithEmailAndPassword(auth, i, p); } catch(e) { alert("Error: "+e.message); }
             } else {
-                if(i.length<8) return alert("Invalid Phone");
+                if(i.length<8) { alert("Invalid Phone"); return; }
                 btn.disabled=true; btn.innerText="Sending SMS...";
-                setupRecaptcha('recaptcha-container-login');
-                try { confirmationResult = await signInWithPhoneNumber(auth, i, window.recaptchaVerifier); document.getElementById('login-form').style.display='none'; document.getElementById('otp-form').style.display='block'; }
-                catch(e) { alert(e.message); btn.disabled=false; }
+                
+                setupRecaptcha();
+
+                try {
+                    confirmationResult = await signInWithPhoneNumber(auth, i, window.recaptchaVerifier);
+                    document.getElementById('login-form').style.display='none'; 
+                    document.getElementById('otp-form').style.display='block';
+                } catch(e) { 
+                    console.error(e); 
+                    alert("SMS Error: " + e.message); 
+                    btn.disabled=false; btn.innerText="Continue";
+                    // Force reset on error
+                    if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
+                }
             }
         }
 
         window.handleRegister = async () => {
-            const i = document.getElementById('regInput').value.trim(); const p = document.getElementById('regPass').value; const n = document.getElementById('regName').value;
-            if(!n) return alert("Name needed");
+            const i = document.getElementById('regInput').value.trim();
+            const p = document.getElementById('regPass').value;
+            const n = document.getElementById('regName').value;
+            const btn = document.getElementById('regBtn');
+
+            if(!n) { alert("Name needed"); return; } tempRegName = n;
+
             if(i.includes('@')) {
-                if(p.length<6) return alert("Pass short");
-                try { const uc = await createUserWithEmailAndPassword(auth, i, p); await updateProfile(uc.user, {displayName:n}); await addDoc(collection(db, "users"), {uid:uc.user.uid, name:n, email:i, profilePic:null}); }
+                if(p.length<6) { alert("Password short"); return; }
+                try { const uc = await createUserWithEmailAndPassword(auth, i, p); await updateProfile(uc.user, {displayName:n}); await addDoc(collection(db, "users"), {uid:uc.user.uid, name:n, email:i, profilePic:null}); alert("Created!"); } 
                 catch(e) { alert(e.message); }
             } else {
-                setupRecaptcha('recaptcha-container-reg');
-                try { confirmationResult = await signInWithPhoneNumber(auth, i, window.recaptchaVerifier); document.getElementById('register-form').style.display='none'; document.getElementById('otp-form').style.display='block'; }
-                catch(e) { alert(e.message); }
+                if(i.length<8) { alert("Invalid Phone"); return; }
+                btn.disabled=true; btn.innerText="Sending...";
+                
+                setupRecaptcha();
+
+                try { 
+                    confirmationResult = await signInWithPhoneNumber(auth, i, window.recaptchaVerifier); 
+                    document.getElementById('register-form').style.display='none'; 
+                    document.getElementById('otp-form').style.display='block'; 
+                } catch(e) { 
+                    alert("SMS Error: " + e.message); 
+                    btn.disabled=false; btn.innerText="Sign Up";
+                    if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
+                }
             }
         }
 
         window.verifyOTP = async () => {
             const c = document.getElementById('otpCode').value;
-            try { const res = await confirmationResult.confirm(c); const q=query(collection(db,"users"),where("uid","==",res.user.uid)); const s=await getDocs(q); if(s.empty) await addDoc(collection(db,"users"),{uid:res.user.uid,name:"User",phone:res.user.phoneNumber,profilePic:null}); }
-            catch(e) { alert("Wrong Code"); }
+            try { 
+                const res = await confirmationResult.confirm(c); 
+                const q=query(collection(db,"users"),where("uid","==",res.user.uid)); 
+                const s=await getDocs(q); 
+                if(s.empty) await addDoc(collection(db,"users"),{uid:res.user.uid,name:tempRegName||"User",phone:res.user.phoneNumber,profilePic:null});
+            } catch(e) { alert("Wrong Code"); }
         }
+
         window.logoutUser = () => signOut(auth);
 
-        // --- AUTH STATE ---
         onAuthStateChanged(auth, async (user) => {
             if(user) {
                 document.getElementById('login-overlay').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
+                
                 const id = user.phoneNumber || user.email;
                 document.getElementById('navUserName').innerText = user.displayName || "User";
                 document.getElementById('settingContact').value = id;
-                
+                document.getElementById('settingUid').value = user.uid;
+
                 isAdmin = (user.phoneNumber === ADMIN_PHONE || user.email === "admin@myclass.com");
                 if(isAdmin) {
                     document.getElementById('adminBadge').style.display='block';
                     document.getElementById('adminAddCourseBtn').style.display='flex';
-                    document.getElementById('seedBtn').style.display='block';
                 } else {
                     document.getElementById('adminBadge').style.display='none';
                     document.getElementById('adminAddCourseBtn').style.display='none';
-                    document.getElementById('seedBtn').style.display='none';
                 }
-                
+
+                const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
+                const snap = await getDocs(q);
+                if(!snap.empty) {
+                    const d = snap.docs[0].data();
+                    if(d.profilePic) {
+                        document.getElementById('navUserPic').src = d.profilePic;
+                        document.getElementById('navUserPic').style.display='block';
+                        document.getElementById('navUserInitial').style.display='none';
+                        document.getElementById('settingUserPic').src = d.profilePic;
+                        document.getElementById('settingUserPic').style.display='block';
+                        document.getElementById('settingUserInitial').style.display='none';
+                    }
+                }
                 loadFeed();
                 loadCourses();
             } else {
                 document.getElementById('login-overlay').style.display = 'flex';
                 document.getElementById('app-content').style.display = 'none';
+                if(window.recaptchaVerifier) { window.recaptchaVerifier.clear(); window.recaptchaVerifier = null; }
             }
         });
 
-        // --- COURSE SYSTEM (FULL CONTROL) ---
-        function loadCourses() {
-            onSnapshot(collection(db, "courses"), (s) => {
-                const g = document.getElementById('courseGrid');
-                const addBtn = document.getElementById('adminAddCourseBtn');
-                g.querySelectorAll('.db-course').forEach(e=>e.remove());
-                
-                s.forEach(d => {
-                    const c = d.data();
-                    const div = document.createElement('div'); 
-                    div.className = "course-card db-course";
-                    div.innerHTML = `<div class="course-thumb">📘</div><div class="course-info"><h3>${c.title}</h3><span>${c.videos?c.videos.length:0} Videos</span></div>`;
-                    div.onclick = () => openCourse(d.id, c);
-                    g.insertBefore(div, addBtn);
-                });
-            });
-        }
-
-        window.toggleAddCourseForm = () => { const f=document.getElementById('add-course-form'); f.style.display=f.style.display==='none'?'block':'none'; }
-        window.createNewCourse = async () => {
-            const t = document.getElementById('newCourseTitle').value; if(!t) return;
-            await addDoc(collection(db, "courses"), { title: t, description: "", videos: [] });
-            toggleAddCourseForm();
-        }
-
-        window.openCourse = (id, data) => {
-            currentCourseId = id;
-            currentCourseData = data;
-            document.getElementById('course-list-view').style.display='none';
-            document.getElementById('course-player-view').style.display='block';
-            document.getElementById('playerTitle').innerText = data.title;
-
-            // Admin Controls for ALL courses
-            if(isAdmin) {
-                document.getElementById('adminCourseControls').style.display = 'block';
-                document.getElementById('deleteCourseBtn').style.display = 'block';
-                document.getElementById('adminVideoBox').style.display = 'block';
-            } else {
-                document.getElementById('adminCourseControls').style.display = 'none';
-                document.getElementById('deleteCourseBtn').style.display = 'none';
-                document.getElementById('adminVideoBox').style.display = 'none';
-            }
-            renderVideos(data.videos || []);
-        }
-
-        function renderVideos(videos) {
-            const list = document.getElementById('lessonList'); list.innerHTML = "";
-            if(videos.length === 0) list.innerHTML = "<div style='padding:10px; color:gray;'>No videos.</div>";
-            videos.forEach((v, i) => {
-                const item = document.createElement('div'); item.className = "lesson-item";
-                // Delete button for each video
-                const delBtn = isAdmin ? `<span onclick="event.stopPropagation(); deleteVideo(${i})" style="color:red; font-size:12px; border:1px solid red; padding:2px 5px; border-radius:4px;">✕ Delete</span>` : "";
-                item.innerHTML = `<div class="lesson-title"><span>▶️</span> ${v.title}</div> ${delBtn}`;
-                item.onclick = () => document.getElementById('mainVideo').src = `https://www.youtube.com/embed/${v.id}`;
-                list.appendChild(item);
-            });
-        }
-
-        window.addVideoToCourse = async () => {
-            const t = document.getElementById('newVideoTitle').value; const u = document.getElementById('newVideoLink').value;
-            if(!t || !u) return;
-            let vidId = ""; if(u.includes("youtu.be/")) vidId = u.split("youtu.be/")[1].split("?")[0]; else if(u.includes("v=")) vidId = u.split("v=")[1].split("&")[0];
-            if(!vidId) { alert("Invalid Link"); return; }
-            await updateDoc(doc(db, "courses", currentCourseId), { videos: arrayUnion({ title: t, id: vidId }) });
-            alert("Added!");
-        }
-
-        // Delete specific video by re-saving array
-        window.deleteVideo = async (index) => {
-            if(!confirm("Delete this video?")) return;
-            const newVideos = currentCourseData.videos.filter((_, i) => i !== index);
-            await updateDoc(doc(db, "courses", currentCourseId), { videos: newVideos });
-            // UI updates via listener automatically
-        }
-
-        window.deleteCurrentCourse = async () => {
-            if(confirm("Delete ENTIRE course?")) {
-                await deleteDoc(doc(db, "courses", currentCourseId));
-                window.backToCourses();
-            }
-        }
-
-        window.editCourseTitle = async () => {
-            const newTitle = prompt("Enter new title:", currentCourseData.title);
-            if(newTitle) {
-                await updateDoc(doc(db, "courses", currentCourseId), { title: newTitle });
-                document.getElementById('playerTitle').innerText = newTitle;
-            }
-        }
-
-        // Seed Default Courses to DB (One time)
-        window.seedDefaultCourses = async () => {
-            if(!confirm("Add default courses to database?")) return;
-            await addDoc(collection(db, "courses"), { title: "Web Development", videos: [{title:"Intro", id:"ok-plXXHlWw"}] });
-            await addDoc(collection(db, "courses"), { title: "Digital Marketing", videos: [{title:"Basics", id:"bixR-KIJKYM"}] });
-            alert("Restored!");
-        }
-
-        window.backToCourses = () => { document.getElementById('course-player-view').style.display='none'; document.getElementById('course-list-view').style.display='block'; document.getElementById('mainVideo').src=""; }
-
-        // --- OTHERS ---
+        // --- GENERATOR, COURSES & OTHERS (Same as V27) ---
         function loadFeed() {
             onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (s)=>{
                 const f = document.getElementById('feedStream'); f.innerHTML = "";
@@ -418,9 +354,10 @@
             if(!topic) return;
             let REAL_KEY = ""; try { REAL_KEY = atob(ENCODED_KEY); } catch(e) { return; }
             btn.innerText = "Thinking...";
+            const prompt = `Act as Social Media Manager. Write a ${document.getElementById('length').value} post for ${document.getElementById('platform').value}. Type: ${document.getElementById('contentType').value}. Topic: "${topic}". Audience: ${document.getElementById('target').value}. Tone: ${document.getElementById('tone').value}. Creativity: ${document.getElementById('creativity').value}. Language: Burmese.`;
             try {
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${REAL_KEY}`, {
-                    method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({contents:[{parts:[{text:`Write a post about ${topic} in Burmese.`}]}]})
+                    method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}]})
                 });
                 const d = await res.json();
                 output.innerText = d.candidates[0].content.parts[0].text;
@@ -428,6 +365,54 @@
             btn.innerText = "✨ Generate";
         }
         window.sendToFeed = () => { window.switchTab('feed'); document.getElementById('postInput').value = document.getElementById('output').innerText; }
+        
+        function loadCourses() {
+            onSnapshot(collection(db, "courses"), (s) => {
+                const g = document.getElementById('courseGrid');
+                g.querySelectorAll('.dynamic-course').forEach(e => e.remove());
+                s.forEach(d => {
+                    const c=d.data();
+                    const div = document.createElement('div'); div.className = "course-card dynamic-course";
+                    div.innerHTML = `<div class="course-thumb">📘</div><div class="course-info"><h3>${c.title}</h3><span>${c.videos?c.videos.length:0} Videos</span></div>`;
+                    div.onclick = () => openAdminCourse(d.id, c);
+                    g.insertBefore(div, document.getElementById('adminAddCourseBtn'));
+                });
+            });
+        }
+        const defaultCourses = { 'webdev': { title: "Web Development", videos: [ {title:"HTML", id:"ok-plXXHlWw"}, {title:"CSS", id:"1Rs2ND1ryYc"}, {title:"JS", id:"hdI2bqOjy3c"} ] }, 'marketing': { title: "Digital Marketing", videos: [ {title:"Marketing 101", id:"bixR-KIJKYM"}, {title:"Strategy", id:"U5i80B0O_h4"} ] } };
+        window.openDefaultCourse = (key) => {
+            isDefaultCourse = true; document.getElementById('deleteCourseBtn').style.display = 'none'; document.getElementById('adminVideoBox').style.display = 'none';
+            openPlayer(defaultCourses[key].title, defaultCourses[key].videos);
+        }
+        window.openAdminCourse = (id, data) => {
+            isDefaultCourse = false; currentCourseId = id;
+            if(isAdmin) { document.getElementById('deleteCourseBtn').style.display = 'block'; document.getElementById('adminVideoBox').style.display = 'block'; }
+            else { document.getElementById('deleteCourseBtn').style.display = 'none'; document.getElementById('adminVideoBox').style.display = 'none'; }
+            openPlayer(data.title, data.videos || []);
+        }
+        function openPlayer(title, videos) {
+            document.getElementById('course-list-view').style.display='none'; document.getElementById('course-player-view').style.display='block';
+            document.getElementById('playerTitle').innerText = title;
+            const list = document.getElementById('lessonList'); list.innerHTML = "";
+            if(!videos || videos.length===0) list.innerHTML="<div style='padding:10px; color:gray;'>No videos yet.</div>";
+            else videos.forEach(v => { list.innerHTML += `<div class="lesson-item" onclick="document.getElementById('mainVideo').src='https://www.youtube.com/embed/${v.id}'">▶️ ${v.title}</div>`; });
+        }
+        window.toggleAddCourseForm = () => { const f = document.getElementById('add-course-form'); f.style.display = f.style.display==='none'?'block':'none'; }
+        window.createNewCourse = async () => {
+            const t = document.getElementById('newCourseTitle').value; if(!t) return;
+            await addDoc(collection(db, "courses"), { title: t, description: "", videos: [] });
+            window.toggleAddCourseForm();
+        }
+        window.addVideoToCourse = async () => {
+            const t = document.getElementById('newVideoTitle').value; const u = document.getElementById('newVideoLink').value;
+            if(!t || !u) return;
+            let vidId = ""; if(u.includes("youtu.be/")) vidId = u.split("youtu.be/")[1].split("?")[0]; else if(u.includes("v=")) vidId = u.split("v=")[1].split("&")[0];
+            if(!vidId) { alert("Invalid Link"); return; }
+            await updateDoc(doc(db, "courses", currentCourseId), { videos: arrayUnion({ title: t, id: vidId }) });
+            alert("Added!");
+        }
+        window.deleteCurrentCourse = async () => { if(isDefaultCourse || !isAdmin) return; if(confirm("Delete?")) { await deleteDoc(doc(db, "courses", currentCourseId)); window.backToCourses(); } }
+        window.backToCourses = () => { document.getElementById('course-player-view').style.display='none'; document.getElementById('course-list-view').style.display='block'; document.getElementById('mainVideo').src=""; }
         window.switchTab = (t) => { document.querySelectorAll('.section').forEach(e=>e.classList.remove('active')); document.getElementById(t+'-section').classList.add('active'); }
         window.triggerFileInput = () => document.getElementById('profileInput').click();
         window.updateProfilePic = (input) => {
@@ -436,12 +421,14 @@
             reader.onload = async (e) => {
                 const base64 = e.target.result;
                 const user = auth.currentUser;
-                const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
-                const snap = await getDocs(q);
-                if(!snap.empty) {
-                    await updateDoc(doc(db, "users", snap.docs[0].id), { profilePic: base64 });
-                    document.getElementById('navUserPic').src = base64;
-                    document.getElementById('settingUserPic').src = base64;
+                if(user) {
+                    const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
+                    const snap = await getDocs(q);
+                    if(!snap.empty) {
+                        await updateDoc(doc(db, "users", snap.docs[0].id), { profilePic: base64 });
+                        document.getElementById('navUserPic').src = base64; document.getElementById('navUserPic').style.display='block';
+                        document.getElementById('settingUserPic').src = base64; document.getElementById('settingUserPic').style.display='block';
+                    }
                 }
             };
             reader.readAsDataURL(file);
@@ -449,4 +436,3 @@
     </script>
 </body>
 </html>
-```
