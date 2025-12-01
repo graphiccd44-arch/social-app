@@ -1,139 +1,216 @@
 <!DOCTYPE html>
-<html lang="my">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Login System</title>
+    <title>Email Login App</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #eef2f9; /* Light purple-grey background */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f2f5;
             margin: 0;
         }
-        .login-container {
+
+        .card {
             background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            width: 300px;
+            width: 380px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             text-align: center;
         }
-        h2 { margin-bottom: 1.5rem; color: #333; }
+
+        .icon-header {
+            font-size: 2rem;
+            color: #5d5fef;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #5d5fef; /* Purple color matching screenshot */
+            margin: 10px 0 5px;
+            font-weight: 700;
+        }
+
+        p.subtitle {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
         input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box; 
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
         }
-        button {
+
+        input:focus {
+            border-color: #5d5fef;
+        }
+
+        button.action-btn {
             width: 100%;
-            padding: 10px;
-            margin-top: 10px;
+            padding: 15px;
+            background-color: #5d5fef; /* The Purple Button */
+            color: white;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 10px;
+            font-size: 1rem;
             font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
             transition: background 0.3s;
         }
-        #loginBtn { background-color: #1877f2; color: white; }
-        #loginBtn:hover { background-color: #166fe5; }
-        
-        #signupBtn { background-color: #42b72a; color: white; margin-top: 15px; }
-        #signupBtn:hover { background-color: #36a420; }
 
-        .message {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            color: red;
+        button.action-btn:hover {
+            background-color: #4b4dcf;
         }
+
+        .link-text {
+            display: block;
+            margin-top: 20px;
+            color: #5d5fef;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .hidden { display: none; }
+        .error-msg { color: red; font-size: 0.85rem; margin-top: 10px; }
+        .success-msg { color: green; font-size: 0.85rem; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="login-container">
-        <h2>အကောင့်ဝင်ရန်</h2>
-        <input type="email" id="email" placeholder="Email ထည့်ပါ" required>
-        <input type="password" id="password" placeholder="Password ထည့်ပါ" required>
-        
-        <button id="loginBtn">Login ဝင်မယ်</button>
-        <button id="signupBtn">အကောင့်သစ်ဖွင့်မယ်</button>
+    <div id="login-form" class="card">
+        <div class="icon-header"><i class="fas fa-envelope"></i></div>
+        <h2>Login</h2>
+        <p class="subtitle">Login with Email & Password</p>
 
-        <p id="message" class="message"></p>
+        <input type="email" id="login-email" placeholder="Email Address">
+        <input type="password" id="login-password" placeholder="Password">
+
+        <button class="action-btn" id="btnLogin">Login</button>
+        <p id="login-msg"></p>
+
+        <span class="link-text" onclick="showRegister()">No account? Sign Up</span>
+    </div>
+
+    <div id="register-form" class="card hidden">
+        <div class="icon-header"><i class="fas fa-user-plus"></i></div>
+        <h2>Create Account</h2>
+        <p class="subtitle">Enter email and set password.</p>
+
+        <input type="text" id="reg-name" placeholder="Full Name">
+        <input type="email" id="reg-email" placeholder="Email Address">
+        <input type="password" id="reg-password" placeholder="Set Password (Min 6 chars)">
+
+        <button class="action-btn" id="btnRegister">Verify & Register</button>
+        <p id="reg-msg"></p>
+
+        <span class="link-text" onclick="showLogin()">Back to Login</span>
     </div>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-      // TODO: ဒီနေရာမှာ ကိုယ့်ရဲ့ Firebase Config ကို အစားထိုးထည့်ပေးရပါမယ်
-      // Firebase Console (https://console.firebase.google.com/) ကနေ ရယူနိုင်ပါတယ်
-      const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
-      };
+        // *** အရေးကြီး: အောက်က နေရာမှာ ကိုယ့် Firebase Config ထည့်ပါ ***
+        const firebaseConfig = {
+            apiKey: "AIzaSyBSFFk8W2JuPIevs3fDc4bzMBCrVDHOiao",
+  authDomain: "socialappsss-abacd.firebaseapp.com",
+  projectId: "socialappsss-abacd",
+  storageBucket: "socialappsss-abacd.firebasestorage.app",
+  messagingSenderId: "963063248644",
+  appId: "1:963063248644:web:061e588eee6867495f0251",
+  measurementId: "G-Y4GTE53VGK"
+        };
 
-      // Initialize Firebase
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-      const emailInput = document.getElementById('email');
-      const passwordInput = document.getElementById('password');
-      const messageBox = document.getElementById('message');
+        // UI Element Selection
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
 
-      // Sign Up Function (အကောင့်သစ်ဖွင့်ခြင်း)
-      document.getElementById('signupBtn').addEventListener('click', () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-
-        if(!email || !password) {
-            messageBox.style.color = 'red';
-            messageBox.innerText = "Email နှင့် Password ထည့်သွင်းပေးပါ။";
-            return;
+        // Toggle Functions
+        window.showRegister = () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+        }
+        window.showLogin = () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
         }
 
-        createUserWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            messageBox.style.color = 'green';
-            messageBox.innerText = "အကောင့်ဖွင့်ခြင်း အောင်မြင်ပါသည်! Login ဝင်နိုင်ပါပြီ။";
-          })
-          .catch((error) => {
-            messageBox.style.color = 'red';
-            messageBox.innerText = "Error: " + error.message;
-          });
-      });
+        // --- LOGIN LOGIC ---
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const msg = document.getElementById('login-msg');
 
-      // Login Function (အကောင့်ဝင်ခြင်း)
-      document.getElementById('loginBtn').addEventListener('click', () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
+            msg.className = ''; msg.innerText = "Processing...";
 
-        if(!email || !password) {
-            messageBox.style.color = 'red';
-            messageBox.innerText = "Email နှင့် Password ထည့်သွင်းပေးပါ။";
-            return;
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    msg.className = 'success-msg';
+                    msg.innerText = "Login Successful!";
+                    // Redirect to home page here
+                    // window.location.href = "home.html";
+                })
+                .catch((error) => {
+                    msg.className = 'error-msg';
+                    msg.innerText = getErrorMessage(error.code);
+                });
+        });
+
+        // --- REGISTER LOGIC ---
+        document.getElementById('btnRegister').addEventListener('click', () => {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const msg = document.getElementById('reg-msg');
+
+            if(password.length < 6) {
+                msg.className = 'error-msg';
+                msg.innerText = "Password must be at least 6 characters.";
+                return;
+            }
+
+            msg.className = ''; msg.innerText = "Creating Account...";
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    msg.className = 'success-msg';
+                    msg.innerText = "Account Created! Please Login.";
+                    setTimeout(() => showLogin(), 2000);
+                })
+                .catch((error) => {
+                    msg.className = 'error-msg';
+                    msg.innerText = getErrorMessage(error.code);
+                });
+        });
+
+        // Helper to make error messages user-friendly
+        function getErrorMessage(code) {
+            switch (code) {
+                case 'auth/email-already-in-use': return "This email is already registered.";
+                case 'auth/invalid-email': return "Invalid email address.";
+                case 'auth/user-not-found': return "No account found with this email.";
+                case 'auth/wrong-password': return "Incorrect password.";
+                default: return "Error: " + code;
+            }
         }
-
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            messageBox.style.color = 'green';
-            messageBox.innerText = "Login ဝင်ခြင်း အောင်မြင်ပါသည်။ Welcome!";
-            // ဒီနေရာမှာ အခြား Page သို့ ညွှန်းနိုင်ပါတယ် (ဥပမာ window.location.href = "home.html")
-          })
-          .catch((error) => {
-            messageBox.style.color = 'red';
-            messageBox.innerText = "Email သို့မဟုတ် Password မှားယွင်းနေပါသည်။";
-          });
-      });
     </script>
 </body>
 </html>
