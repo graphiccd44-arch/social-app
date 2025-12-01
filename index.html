@@ -156,22 +156,28 @@
 
         // --- LOGIN LOGIC ---
         document.getElementById('btnLogin').addEventListener('click', () => {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const msg = document.getElementById('login-msg');
-
-            msg.className = ''; msg.innerText = "Processing...";
+            // ... (အပေါ်က email/password ယူတဲ့ code တွေ) ...
 
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     msg.className = 'success-msg';
-                    msg.innerText = "Login Successful!";
-                    // Redirect to home page here
-                    // window.location.href = "home.html";
+                    msg.innerText = "Login Successful! Redirecting...";
+
+                    // *** ဒီလိုင်းကို ထည့်ပါ သို့မဟုတ် Comment ဖြုတ်ပါ ***
+                    window.location.href = "home.html"; // 'home.html' ကို ကိုယ်သွားချင်တဲ့ Page နာမည်နဲ့ အစားထိုးနိုင်ပါတယ်။
+
+                })
+                .catch((error) => {
+                    // ... (error message code များ) ...
+                });
+        });
+                    
                 })
                 .catch((error) => {
                     msg.className = 'error-msg';
                     msg.innerText = getErrorMessage(error.code);
+
+                    
                 });
         });
 
