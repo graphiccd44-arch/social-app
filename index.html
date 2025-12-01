@@ -1,466 +1,139 @@
-ဟုတ်ကဲ့၊ ခင်ဗျားလိုချင်တဲ့ ပုံစံကို ကျွန်တော် သဘောပေါက်ပါပြီ။ ဒါက အကောင်းဆုံးနဲ့ လုံခြုံမှုအရှိဆုံး နည်းလမ်းပါပဲ။
-
-**လုပ်ဆောင်ပုံ လုပ်ငန်းစဉ် (Logic Flow):**
-
-1.  **Sign Up (အကောင့်ဖွင့်ချိန်):**
-      * ဖုန်းနံပါတ်၊ နာမည်၊ Password ဖြည့်မယ်။
-      * SMS Code ပို့မယ် (ဖုန်းမှန်မမှန် စစ်ဖို့)။
-      * Code မှန်မှသာ အကောင့်ကို အတည်ပြုပြီး **Database ထဲမှာ Password နဲ့တကွ သိမ်းမယ်**။
-2.  **Login (နောက်ပိုင်းဝင်ချိန်):**
-      * SMS ထပ်ပို့စရာမလိုတော့ဘူး။
-      * **ဖုန်းနံပါတ် + Password** ရိုက်ထည့်ပြီး တန်းဝင်ရုံပါပဲ။
-
-ဒါဆိုရင် **SMS စရိတ်လည်း သက်သာမယ်** (တစ်ခါပဲ ပို့ရလို့)၊ **လုံခြုံမှုလည်း ရှိမယ်** (Password ပါလို့)။
-
-### Version 31.0 (One-Time Verify & Password Login)
-
-GitHub `index.html` မှာ အကုန်ဖျက်ပြီး ဒါကို အစားထိုးလိုက်ပါ။
-
-*(⚠️ `ADMIN_PHONE` မှာ မင်းရဲ့ ဖုန်းနံပါတ်အစစ် ထည့်ဖို့ မမေ့ပါနဲ့)*
-
-```html
 <!DOCTYPE html>
 <html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Class (Smart Auth)</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Email Login System</title>
     <style>
-        :root { --primary: #6366f1; --bg-body: #f3f4f6; --bg-card: #ffffff; --text-main: #1f2937; --border: #e5e7eb; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-body); margin: 0; color: var(--text-main); }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+            margin: 0;
+        }
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h2 { margin-bottom: 1.5rem; color: #333; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box; 
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        #loginBtn { background-color: #1877f2; color: white; }
+        #loginBtn:hover { background-color: #166fe5; }
         
-        /* AUTH UI */
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #eef2ff; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        .login-input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .login-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition:0.2s; }
-        .login-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .toggle-link { margin-top: 15px; font-size: 13px; color: var(--primary); cursor: pointer; text-decoration: underline; display: block; }
+        #signupBtn { background-color: #42b72a; color: white; margin-top: 15px; }
+        #signupBtn:hover { background-color: #36a420; }
 
-        /* APP UI */
-        .navbar { background: var(--bg-card); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        .main-layout { display: grid; grid-template-columns: 260px 1fr; gap: 20px; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
-        .sidebar { background: var(--bg-card); border-radius: 12px; padding: 15px; height: fit-content; border: 1px solid var(--border); position: sticky; top: 80px; }
-        .menu-item { padding: 12px; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 12px; margin-bottom: 5px; transition:0.2s; }
-        .menu-item:hover { background:#f3f4f6; }
-        .menu-item.active { background: #eef2ff; color: var(--primary); border-left: 4px solid var(--primary); }
-        .section { display: none; animation: fadeIn 0.3s; } .section.active { display: block; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
-
-        /* COMPONENTS */
-        .card, .gen-card, .create-post, .post, .settings-group { background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        label { display:block; margin-bottom: 5px; font-weight: 600; font-size: 12px; color: #4b5563; text-transform: uppercase; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; }
-        .btn-gen { width: 100%; padding: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .course-card { background: white; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; position: relative; }
-        .course-thumb { height: 140px; background: #e0e7ff; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--primary); }
-        .course-info { padding: 15px; }
-        .add-course-card { border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; flex-direction: column; color: gray; min-height: 200px; cursor: pointer; display: none; } 
-        .video-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .video-player { width: 100%; aspect-ratio: 16/9; background: black; border-radius: 12px; margin-bottom: 15px; }
-        .lesson-list { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 10px; max-height: 500px; overflow-y: auto; }
-        .lesson-item { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; gap: 10px; align-items: center; }
-        .admin-box { background: #f0fdf4; border: 1px dashed #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 15px; display: none; }
-        .admin-btn { padding: 8px 15px; background: #22c55e; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-post { background: var(--primary); color: white; padding: 8px 20px; border-radius: 8px; border: none; cursor: pointer; float: right; font-weight: bold;}
-        .profile-pic-large { width: 100px; height: 100px; border-radius: 50%; background: #eee; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid var(--primary); cursor: pointer; }
-        .profile-pic-large img { width: 100%; height: 100%; object-fit: cover; }
-
-        @media (max-width: 768px) { .main-layout, .video-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+        .message {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: red;
+        }
     </style>
 </head>
 <body>
 
-    <div id="login-overlay">
+    <div class="login-container">
+        <h2>အကောင့်ဝင်ရန်</h2>
+        <input type="email" id="email" placeholder="Email ထည့်ပါ" required>
+        <input type="password" id="password" placeholder="Password ထည့်ပါ" required>
         
-        <div class="login-card" id="login-form">
-            <h2 style="color:var(--primary); margin-bottom:10px;">📱 Login</h2>
-            <p style="color:gray; font-size:13px; margin-bottom:20px;">Login with Phone & Password</p>
-            
-            <input type="tel" id="loginPhone" class="login-input" placeholder="Phone Number (+66...)" onkeypress="if(event.key==='Enter') handleLogin()">
-            <input type="password" id="loginPass" class="login-input" placeholder="Password" onkeypress="if(event.key==='Enter') handleLogin()">
-            
-            <button class="login-btn" onclick="handleLogin()">Login</button>
-            <span class="toggle-link" onclick="toggleAuth('register')">No account? Sign Up</span>
-        </div>
+        <button id="loginBtn">Login ဝင်မယ်</button>
+        <button id="signupBtn">အကောင့်သစ်ဖွင့်မယ်</button>
 
-        <div class="login-card" id="register-form" style="display:none;">
-            <h2 style="color:var(--primary); margin-bottom:10px;">🆕 Create Account</h2>
-            <p style="color:gray; font-size:13px;">Verify phone once, set password.</p>
-            
-            <input type="text" id="regName" class="login-input" placeholder="Full Name">
-            <input type="tel" id="regPhone" class="login-input" placeholder="Phone Number (+66...)" value="+66">
-            <input type="password" id="regPass" class="login-input" placeholder="Set Password (Min 6 chars)">
-            
-            <div id="recaptcha-container" style="margin-bottom:15px; display:flex; justify-content:center;"></div>
-
-            <button class="login-btn" id="sendOtpBtn" onclick="sendOTP()">Verify & Register</button>
-            <span class="toggle-link" onclick="toggleAuth('login')">Back to Login</span>
-        </div>
-
-        <div class="login-card" id="otp-form" style="display:none;">
-            <h2 style="color:var(--primary);">🔒 Enter Code</h2>
-            <p style="color:gray; font-size:13px;">We sent a code to your phone.</p>
-            <input type="text" id="otpCode" class="login-input" placeholder="123456" style="text-align:center; letter-spacing:5px;">
-            <button class="login-btn" onclick="verifyOTPAndCreate()">Confirm & Create</button>
-            <p onclick="location.reload()" style="font-size:12px; color:red; cursor:pointer; margin-top:15px;">Cancel</p>
-        </div>
-
-    </div>
-
-    <div id="app-content" style="display:none;">
-        <nav class="navbar">
-            <div class="logo" onclick="location.reload()"><span>🚀 MyClass</span></div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span style="font-weight:bold;" id="navUserName">User</span>
-                <div style="width:35px; height:35px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; overflow:hidden;">
-                    <img id="navUserPic" src="" style="display:none; width:100%; height:100%;">
-                    <span id="navUserInitial">U</span>
-                </div>
-            </div>
-        </nav>
-
-        <div class="main-layout">
-            <aside class="sidebar">
-                <div class="menu-item active" id="nav-feed" onclick="switchTab('feed')">🏠 Feed</div>
-                <div class="menu-item" id="nav-gen" onclick="switchTab('generator')">✨ AI Generator</div>
-                <div class="menu-item" id="nav-courses" onclick="switchTab('courses')">🎓 My Courses</div>
-                <div class="menu-item" id="nav-settings" onclick="switchTab('settings')">⚙️ Settings</div>
-                <div class="menu-item" onclick="logoutUser()" style="color:red;">🚪 Logout</div>
-            </aside>
-
-            <main>
-                <div id="feed-section" class="section active">
-                    <div class="create-post">
-                        <textarea id="postInput" rows="3" placeholder="Post something..."></textarea>
-                        <button onclick="addPost()" class="btn-post">Post</button>
-                        <div style="clear:both;"></div>
-                    </div>
-                    <div id="feedStream">Loading...</div>
-                </div>
-
-                <div id="generator-section" class="section">
-                    <div class="gen-card">
-                        <h2>✨ AI Content Studio</h2>
-                        <label>Topic</label> <input type="text" id="topic" placeholder="Topic...">
-                        <div class="input-grid"><select id="contentType"><option>Brand Awareness</option><option>Engagement</option><option>Sales</option></select><select id="platform"><option>Facebook</option><option>TikTok</option></select></div>
-                        <div class="input-grid"><input type="text" id="target" placeholder="Target..."><select id="tone"><option>Professional</option><option>Funny</option></select></div>
-                        <div class="input-grid"><select id="creativity"><option>Standard</option><option>High</option></select><select id="length"><option>Medium</option><option>Short</option></select></div>
-                        <button class="btn-gen" id="genBtn" onclick="generateContent()">✨ Generate</button>
-                        <div id="output" class="result-box" style="background:#f8f9fa; padding:15px; margin-top:15px; border:1px solid #ddd; min-height:80px;"></div>
-                        <button class="btn-gen" style="background:#10b981; display:none;" id="useBtn" onclick="sendToFeed()">📝 Send to Feed</button>
-                    </div>
-                </div>
-
-                <div id="courses-section" class="section">
-                    <div id="course-list-view">
-                        <div style="display:flex; justify-content:space-between;"><h2>🎓 My Learning</h2><span id="adminBadge" style="display:none; color:red; font-weight:bold;">ADMIN</span></div>
-                        <div class="course-grid" id="courseGrid">
-                            <div class="course-card" onclick="openDefaultCourse('webdev')"><div class="course-thumb" style="background:#3b82f6;">💻</div><div class="course-info"><h3>Web Development</h3><span>5 Videos</span></div></div>
-                            <div class="course-card" onclick="openDefaultCourse('marketing')"><div class="course-thumb" style="background:#ec4899;">📈</div><div class="course-info"><h3>Digital Marketing</h3><span>5 Videos</span></div></div>
-                            <div class="course-card add-course-card" id="adminAddCourseBtn" onclick="toggleAddCourseForm()"><i class="fas fa-plus-circle" style="font-size:30px;"></i><b>Add New</b></div>
-                        </div>
-                        <div id="add-course-form" style="display:none; margin-top:20px; background:#eef2ff; padding:20px;">
-                            <input type="text" id="newCourseTitle" placeholder="Title"> <input type="text" id="newCourseDesc" placeholder="Desc">
-                            <button class="admin-btn" onclick="createNewCourse()">Create</button> <button class="admin-btn" style="background:gray;" onclick="toggleAddCourseForm()">Cancel</button>
-                        </div>
-                    </div>
-                    <div id="course-player-view" style="display:none;">
-                        <button onclick="backToCourses()" style="margin-bottom:10px; border:none; background:none; color:var(--primary);">← Back</button>
-                        <div style="display:flex; justify-content:space-between;"><h2 id="playerTitle">Course</h2><button id="deleteCourseBtn" onclick="deleteCurrentCourse()" style="display:none; color:red; background:none; border:none;">Delete</button></div>
-                        <div class="video-layout">
-                            <div>
-                                <iframe id="mainVideo" class="video-player" src="" frameborder="0" allowfullscreen></iframe>
-                                <div class="admin-box" id="adminVideoBox">
-                                    <input type="text" id="newVideoTitle" placeholder="Title">
-                                    <div style="display:flex;"><input type="text" id="newVideoLink" placeholder="Link" style="flex:1;"><button class="admin-btn" onclick="addVideoToCourse()">Add</button></div>
-                                </div>
-                            </div>
-                            <div class="lesson-list" id="lessonList"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="settings-section" class="section">
-                    <h2>⚙️ Settings</h2>
-                    <div class="settings-group">
-                        <div class="profile-pic-large" onclick="triggerFileInput()"><img id="settingUserPic" src="" style="display:none;"><span id="settingUserInitial">U</span></div>
-                        <p style="text-align:center; font-size:12px; color:gray;">Tap to change</p>
-                        <input type="file" id="profileInput" accept="image/*" style="display:none" onchange="updateProfilePic(this)">
-                        <label>Phone</label><input type="text" id="settingPhone" readonly style="background:#eee;">
-                        <label>UID</label><input type="text" id="settingUid" readonly style="background:#eee; font-size:12px;">
-                    </div>
-                </div>
-            </main>
-        </div>
+        <p id="message" class="message"></p>
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, updateDoc, arrayUnion, deleteDoc, getDocs, where, limit } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updateProfile } 
-        from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+      import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAFLolC6hEYro24FAFrKTGrXe4WXvISv3M",
-            authDomain: "myclassfeed-766f9.firebaseapp.com",
-            projectId: "myclassfeed-766f9",
-            storageBucket: "myclassfeed-766f9.firebasestorage.app",
-            messagingSenderId: "428491793200",
-            appId: "1:428491793200:web:dc8b769278b0e981d29ef5"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+      // TODO: ဒီနေရာမှာ ကိုယ့်ရဲ့ Firebase Config ကို အစားထိုးထည့်ပေးရပါမယ်
+      // Firebase Console (https://console.firebase.google.com/) ကနေ ရယူနိုင်ပါတယ်
+      const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+      };
 
-        // 🔐 CONFIG
-        const ENCODED_KEY = "QUl6YVN5Q1Z6YUEyQlJGYndfbmcxVmpRWldYNU55TlAtZlItYURR"; 
-        const MODEL_NAME = "gemini-2.5-flash";
-        const ADMIN_PHONE = "+66810733351"; 
-        const DOMAIN = "@myclass.app"; // Fake domain for Phone->Email mapping
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
 
-        let confirmationResult = null;
-        let isAdmin = false;
-        let currentCourseId = null;
-        let isDefaultCourse = false;
-        let tempReg = {};
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const messageBox = document.getElementById('message');
 
-        // --- SMART AUTH LOGIC ---
-        window.toggleAuth = (v) => { 
-            document.getElementById('login-form').style.display = v==='login'?'block':'none'; 
-            document.getElementById('register-form').style.display = v==='register'?'block':'none'; 
-            document.getElementById('otp-form').style.display='none';
+      // Sign Up Function (အကောင့်သစ်ဖွင့်ခြင်း)
+      document.getElementById('signupBtn').addEventListener('click', () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        if(!email || !password) {
+            messageBox.style.color = 'red';
+            messageBox.innerText = "Email နှင့် Password ထည့်သွင်းပေးပါ။";
+            return;
         }
 
-        // 1. REGISTER: Send SMS
-        window.sendOTP = async () => {
-            const name = document.getElementById('regName').value;
-            const phone = document.getElementById('regPhone').value.trim();
-            const pass = document.getElementById('regPass').value;
+        createUserWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            messageBox.style.color = 'green';
+            messageBox.innerText = "အကောင့်ဖွင့်ခြင်း အောင်မြင်ပါသည်! Login ဝင်နိုင်ပါပြီ။";
+          })
+          .catch((error) => {
+            messageBox.style.color = 'red';
+            messageBox.innerText = "Error: " + error.message;
+          });
+      });
 
-            if(!name || !phone || pass.length<6) { alert("Please fill all fields. Pass > 6 chars."); return; }
-            
-            tempReg = { name, phone, pass };
-            const btn = document.getElementById('sendOtpBtn');
-            btn.disabled = true; btn.innerText = "Sending SMS...";
+      // Login Function (အကောင့်ဝင်ခြင်း)
+      document.getElementById('loginBtn').addEventListener('click', () => {
+        const email = emailInput.value;
+        const password = passwordInput.value;
 
-            // Init Recaptcha
-            if(!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'normal' });
-                await window.recaptchaVerifier.render();
-            }
-
-            try {
-                confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
-                document.getElementById('register-form').style.display = 'none';
-                document.getElementById('otp-form').style.display = 'block';
-            } catch (error) {
-                console.error(error);
-                alert("SMS Error: " + error.message);
-                btn.disabled = false; btn.innerText = "Verify & Register";
-            }
+        if(!email || !password) {
+            messageBox.style.color = 'red';
+            messageBox.innerText = "Email နှင့် Password ထည့်သွင်းပေးပါ။";
+            return;
         }
 
-        // 2. VERIFY & CREATE ACCOUNT (Phone + Pass)
-        window.verifyOTPAndCreate = async () => {
-            const code = document.getElementById('otpCode').value;
-            if(!code) return;
-
-            try {
-                // Step A: Verify Phone Ownership
-                const result = await confirmationResult.confirm(code);
-                
-                // Step B: Create "Email/Pass" User using Phone as Email
-                // Note: We must sign out the phone user first to create the email user
-                await signOut(auth);
-
-                const fakeEmail = tempReg.phone + DOMAIN;
-                const uc = await createUserWithEmailAndPassword(auth, fakeEmail, tempReg.pass);
-                await updateProfile(uc.user, { displayName: tempReg.name });
-                
-                // Step C: Save to DB
-                await addDoc(collection(db, "users"), { 
-                    uid: uc.user.uid, 
-                    name: tempReg.name, 
-                    phone: tempReg.phone, 
-                    profilePic: null 
-                });
-
-                alert("✅ Account Created! You can now Login with Phone & Password.");
-                location.reload(); // Reload to clear state and let user login
-
-            } catch (error) {
-                if(error.code === 'auth/email-already-in-use') {
-                    alert("This phone number is already registered! Please Login.");
-                    location.reload();
-                } else {
-                    alert("Error: " + error.message);
-                }
-            }
-        }
-
-        // 3. LOGIN (Phone + Pass Only)
-        window.handleLogin = async () => {
-            const phone = document.getElementById('loginPhone').value.trim();
-            const pass = document.getElementById('loginPass').value;
-            
-            if(!phone || !pass) { alert("Enter Phone and Password"); return; }
-
-            const fakeEmail = phone + DOMAIN;
-
-            try {
-                await signInWithEmailAndPassword(auth, fakeEmail, pass);
-            } catch(e) {
-                alert("Login Failed: Check Phone or Password.");
-            }
-        }
-
-        window.logoutUser = () => signOut(auth);
-
-        // --- AUTH LISTENER ---
-        onAuthStateChanged(auth, async (user) => {
-            if(user) {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
-                
-                // Display Name & Phone
-                const realPhone = user.email.replace(DOMAIN, ""); 
-                document.getElementById('navUserName').innerText = user.displayName || "User";
-                document.getElementById('settingPhone').value = realPhone;
-                document.getElementById('settingUid').value = user.uid;
-
-                // Admin Check
-                isAdmin = (realPhone === ADMIN_PHONE);
-                document.getElementById('adminBadge').style.display = isAdmin ? 'block' : 'none';
-                document.getElementById('adminAddCourseBtn').style.display = isAdmin ? 'flex' : 'none';
-
-                // Load Profile Pic
-                const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
-                const snap = await getDocs(q);
-                if(!snap.empty) {
-                    const d = snap.docs[0].data();
-                    if(d.profilePic) {
-                        document.getElementById('navUserPic').src = d.profilePic;
-                        document.getElementById('navUserPic').style.display='block';
-                        document.getElementById('navUserInitial').style.display='none';
-                        document.getElementById('settingUserPic').src = d.profilePic;
-                        document.getElementById('settingUserPic').style.display='block';
-                        document.getElementById('settingUserInitial').style.display='none';
-                    }
-                }
-                loadFeed();
-                loadCourses();
-            } else {
-                document.getElementById('login-overlay').style.display = 'flex';
-                document.getElementById('app-content').style.display = 'none';
-            }
-        });
-
-        // --- APP LOGIC (Feed, Generator, Courses) ---
-        // (Standard Logic from previous stable versions)
-        function loadFeed() {
-            onSnapshot(query(collection(db, "posts"), orderBy("timestamp", "desc")), (s)=>{
-                const f = document.getElementById('feedStream'); f.innerHTML = "";
-                if(s.empty) { f.innerHTML="<div style='text-align:center;padding:20px;color:gray'>No posts yet</div>"; return; }
-                s.forEach(d => f.innerHTML += `<div class="post"><b>${d.data().username}</b><br><div style="white-space:pre-wrap;">${d.data().content}</div></div>`);
-            });
-        }
-        window.addPost = async () => {
-            const txt = document.getElementById('postInput').value; if(!txt) return;
-            await addDoc(collection(db, "posts"), { content: txt, username: auth.currentUser.displayName||"User", timestamp: serverTimestamp() });
-            document.getElementById('postInput').value = "";
-        }
-        window.generateContent = async function() {
-            const topic = document.getElementById('topic').value;
-            const output = document.getElementById('output');
-            const btn = document.getElementById('genBtn');
-            if(!topic) return;
-            let REAL_KEY = ""; try { REAL_KEY = atob(ENCODED_KEY); } catch(e) { return; }
-            btn.innerText = "Thinking...";
-            const prompt = `Act as Social Media Manager. Write a ${document.getElementById('length').value} post for ${document.getElementById('platform').value}. Type: ${document.getElementById('contentType').value}. Topic: "${topic}". Audience: ${document.getElementById('target').value}. Tone: ${document.getElementById('tone').value}. Creativity: ${document.getElementById('creativity').value}. Language: Burmese.`;
-            try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${REAL_KEY}`, {
-                    method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({contents:[{parts:[{text:prompt}]}]})
-                });
-                const d = await res.json();
-                output.innerText = d.candidates[0].content.parts[0].text;
-            } catch(e) { output.innerText = "Error"; }
-            btn.innerText = "✨ Generate";
-        }
-        window.sendToFeed = () => { window.switchTab('feed'); document.getElementById('postInput').value = document.getElementById('output').innerText; }
-        
-        function loadCourses() {
-            onSnapshot(collection(db, "courses"), (s) => {
-                const g = document.getElementById('courseGrid');
-                g.querySelectorAll('.dynamic-course').forEach(e => e.remove());
-                s.forEach(d => {
-                    const c=d.data();
-                    const div = document.createElement('div'); div.className = "course-card dynamic-course";
-                    div.innerHTML = `<div class="course-thumb">📘</div><div class="course-info"><h3>${c.title}</h3><span>${c.videos?c.videos.length:0} Videos</span></div>`;
-                    div.onclick = () => openAdminCourse(d.id, c);
-                    g.insertBefore(div, document.getElementById('adminAddCourseBtn'));
-                });
-            });
-        }
-        const defaultCourses = { 'webdev': { title: "Web Development", videos: [ {title:"HTML", id:"ok-plXXHlWw"}, {title:"CSS", id:"1Rs2ND1ryYc"} ] }, 'marketing': { title: "Digital Marketing", videos: [ {title:"Marketing 101", id:"bixR-KIJKYM"} ] } };
-        window.openDefaultCourse = (key) => {
-            isDefaultCourse = true; document.getElementById('deleteCourseBtn').style.display = 'none'; document.getElementById('adminVideoBox').style.display = 'none';
-            openPlayer(defaultCourses[key].title, defaultCourses[key].videos);
-        }
-        window.openAdminCourse = (id, data) => {
-            isDefaultCourse = false; currentCourseId = id;
-            if(isAdmin) { document.getElementById('deleteCourseBtn').style.display = 'block'; document.getElementById('adminVideoBox').style.display = 'block'; }
-            else { document.getElementById('deleteCourseBtn').style.display = 'none'; document.getElementById('adminVideoBox').style.display = 'none'; }
-            openPlayer(data.title, data.videos || []);
-        }
-        function openPlayer(title, videos) {
-            document.getElementById('course-list-view').style.display='none'; document.getElementById('course-player-view').style.display='block';
-            document.getElementById('playerTitle').innerText = title;
-            const list = document.getElementById('lessonList'); list.innerHTML = "";
-            if(!videos || videos.length===0) list.innerHTML="<div style='padding:10px; color:gray;'>No videos.</div>";
-            else videos.forEach(v => { list.innerHTML += `<div class="lesson-item" onclick="document.getElementById('mainVideo').src='https://www.youtube.com/embed/${v.id}'">▶️ ${v.title}</div>`; });
-        }
-        window.toggleAddCourseForm = () => { const f = document.getElementById('add-course-form'); f.style.display = f.style.display==='none'?'block':'none'; }
-        window.createNewCourse = async () => {
-            const t = document.getElementById('newCourseTitle').value; if(!t) return;
-            await addDoc(collection(db, "courses"), { title: t, description: "", videos: [] });
-            window.toggleAddCourseForm();
-        }
-        window.addVideoToCourse = async () => {
-            const t = document.getElementById('newVideoTitle').value; const u = document.getElementById('newVideoLink').value;
-            if(!t || !u) return;
-            let vidId = ""; if(u.includes("youtu.be/")) vidId = u.split("youtu.be/")[1].split("?")[0]; else if(u.includes("v=")) vidId = u.split("v=")[1].split("&")[0];
-            if(!vidId) { alert("Invalid Link"); return; }
-            await updateDoc(doc(db, "courses", currentCourseId), { videos: arrayUnion({ title: t, id: vidId }) });
-            alert("Added!");
-        }
-        window.deleteCurrentCourse = async () => { if(isDefaultCourse || !isAdmin) return; if(confirm("Delete?")) { await deleteDoc(doc(db, "courses", currentCourseId)); window.backToCourses(); } }
-        window.backToCourses = () => { document.getElementById('course-player-view').style.display='none'; document.getElementById('course-list-view').style.display='block'; document.getElementById('mainVideo').src=""; }
-        window.switchTab = (t) => { document.querySelectorAll('.section').forEach(e=>e.classList.remove('active')); document.getElementById(t+'-section').classList.add('active'); }
-        window.triggerFileInput = () => document.getElementById('profileInput').click();
-        window.updateProfilePic = (input) => {
-            const file = input.files[0]; if(!file) return;
-            if(file.size > 500000) { alert("Image too large! < 500KB"); return; }
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const base64 = e.target.result;
-                const user = auth.currentUser;
-                if(user) {
-                    const q = query(collection(db, "users"), where("uid", "==", user.uid), limit(1));
-                    const snap = await getDocs(q);
-                    if(!snap.empty) {
-                        await updateDoc(doc(db, "users", snap.docs[0].id), { profilePic: base64 });
-                        document.getElementById('navUserPic').src = base64; document.getElementById('navUserPic').style.display='block';
-                        document.getElementById('settingUserPic').src = base64; document.getElementById('settingUserPic').style.display='block';
-                    }
-                }
-            };
-            reader.readAsDataURL(file);
-        }
+        signInWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            messageBox.style.color = 'green';
+            messageBox.innerText = "Login ဝင်ခြင်း အောင်မြင်ပါသည်။ Welcome!";
+            // ဒီနေရာမှာ အခြား Page သို့ ညွှန်းနိုင်ပါတယ် (ဥပမာ window.location.href = "home.html")
+          })
+          .catch((error) => {
+            messageBox.style.color = 'red';
+            messageBox.innerText = "Email သို့မဟုတ် Password မှားယွင်းနေပါသည်။";
+          });
+      });
     </script>
 </body>
 </html>
-```
